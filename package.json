@@ -1,0 +1,38 @@
+{
+  "name": "juicy",
+  "version": "0.1.0",
+  "description": "類 jQuery 鏈式 API + 虛擬 DOM + MVVM、元件、路由、多語系與全域狀態",
+  "main": "src/juicy.js",
+  "module": "dist/juicy.mjs",
+  "types": "types/juicy.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/juicy.d.ts",
+      "import": "./dist/juicy.mjs",
+      "require": "./src/juicy.js",
+      "default": "./src/juicy.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "dist",
+    "types/juicy.d.ts",
+    "README.md",
+    "README.en.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "node scripts/build.js",
+    "build:example": "node scripts/build-example.js",
+    "serve": "node scripts/serve.js",
+    "typecheck": "tsc -p types",
+    "test": "node scripts/build.js --check && node test/juicy.test.js && node test/esm.test.mjs && node test/docs-i18n.test.js && npm run typecheck"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "jsdom": "^24.0.0",
+    "typescript": "^5.4.0"
+  },
+  "license": "MIT"
+}

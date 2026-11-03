@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>拾光設計 Lumio Studio</title>
+  <meta name="description" content="拾光設計是一間專注品牌識別、網站與產品介面的設計工作室（juicy.js 範例，內容為虛構）。" />
+
+  <!-- Tailwind CSS（Play CDN，方便直接開啟範例；正式專案請改用 Tailwind CLI 或打包工具產生 CSS） -->
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans TC"', 'system-ui', '-apple-system', '"PingFang TC"', 'sans-serif'],
+          },
+          keyframes: {
+            page: { from: { opacity: '0', transform: 'translateY(10px)' }, to: { opacity: '1', transform: 'none' } },
+            float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-14px)' } },
+          },
+          animation: {
+            page: 'page .45s ease-out both',
+            float: 'float 7s ease-in-out infinite',
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* juicy.js 的 .transition() 需要 enter / leave 兩段狀態的 class，用一般 CSS 定義 */
+    .fade-enter-active,
+    .fade-leave-active {
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .fade-enter-from,
+    .fade-leave-to {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+
+    .toast-enter-active,
+    .toast-leave-active {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .toast-enter-from,
+    .toast-leave-to {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-white font-sans text-stone-800 antialiased dark:bg-stone-950 dark:text-stone-200">
+  <div id="app"></div>
+  <noscript>這個範例需要啟用 JavaScript。</noscript>
+
+  <!-- 入口是 ES module：元件與頁面都以 import 載入，需透過 http(s) 開啟（見 examples/README.md） -->
+  <script type="module" src="main.js"></script>
+</body>
+</html>

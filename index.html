@@ -1,0 +1,2930 @@
+<!doctype html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>juicy.js API 文件</title>
+  <style>
+    :root {
+      --bg: #fbfaf7;
+      --panel: #ffffff;
+      --text: #1f2328;
+      --muted: #656d76;
+      --border: #e3e0d8;
+      --accent: #c98a00;
+      --accent-soft: #fff4d1;
+      --code-bg: #f4f2ec;
+      --tk-k: #a626a4;
+      --tk-s: #2f7d32;
+      --tk-c: #8a8f98;
+      --tk-n: #b45309;
+      --tk-f: #1f6feb;
+      --tk-d: #c98a00;
+      --log-bg: #1e1f22;
+      --log-text: #d6d8dc;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #16171a;
+        --panel: #1d1f23;
+        --text: #e6e6e6;
+        --muted: #9aa0a6;
+        --border: #2e3137;
+        --accent: #ffcc00;
+        --accent-soft: #3a3214;
+        --code-bg: #24262b;
+        --tk-k: #d19af0;
+        --tk-s: #8fd18f;
+        --tk-c: #7d838c;
+        --tk-n: #f0a868;
+        --tk-f: #79b8ff;
+        --tk-d: #ffcc00;
+        --log-bg: #0f1012;
+        --log-text: #c9ccd1;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.65 system-ui, -apple-system, "PingFang TC", "Noto Sans TC", sans-serif;
+    }
+
+    code,
+    pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    #layout {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    #nav {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 24px 12px;
+    }
+
+    .brand {
+      font-size: 22px;
+      font-weight: 800;
+      padding: 0 10px;
+    }
+
+    .brand span {
+      color: var(--accent);
+    }
+
+    .ver {
+      color: var(--muted);
+      font-size: 12px;
+      padding: 0 10px 10px;
+    }
+
+    .lang {
+      display: inline-flex;
+      margin: 0 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .lang button {
+      font: inherit;
+      font-size: 12px;
+      padding: 3px 12px;
+      border: 0;
+      background: none;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .lang button.on {
+      background: var(--accent);
+      color: #000;
+      font-weight: 600;
+    }
+
+    .toc-group {
+      margin: 14px 10px 4px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .toc-group::before {
+      content: "★ ";
+      color: var(--accent);
+    }
+
+    .part {
+      margin-bottom: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .toc a {
+      display: block;
+      padding: 5px 10px;
+      border-radius: 6px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .toc a:hover {
+      color: var(--text);
+    }
+
+    .toc a.active {
+      background: var(--accent-soft);
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    #main {
+      padding: 32px 40px 120px;
+      min-width: 0;
+    }
+
+    section {
+      padding-top: 24px;
+      margin-bottom: 40px;
+      scroll-margin-top: 8px;
+    }
+
+    h1 {
+      font-size: 40px;
+      margin: 0 0 4px;
+    }
+
+    h1 span {
+      color: var(--accent);
+    }
+
+    h2 {
+      font-size: 26px;
+      margin: 0 0 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h3 {
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 17px;
+      margin-top: 0;
+    }
+
+    .intro {
+      color: var(--muted);
+    }
+
+    .intro code,
+    .api td code,
+    .desc code,
+    li code {
+      background: var(--code-bg);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .features li {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+
+    .features b {
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .api {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 20px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: block;
+      overflow-x: auto;
+    }
+
+    .api tbody {
+      display: table;
+      width: 100%;
+    }
+
+    .api td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .api tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .api td:first-child {
+      white-space: nowrap;
+      width: 1%;
+    }
+
+    .api td:first-child code {
+      background: none;
+      padding: 0;
+      color: var(--tk-f);
+    }
+
+    .demo {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin: 16px 0;
+      overflow: hidden;
+    }
+
+    .demo-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .rerun {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .rerun:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .demo .reset {
+      display: none;
+    }
+
+    .demo.edited .reset {
+      display: inline-block;
+    }
+
+    .demo.edited h3::after {
+      content: "已修改";
+      margin-left: 8px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      border: 1px solid currentColor;
+      border-radius: 4px;
+      padding: 0 5px;
+      vertical-align: 2px;
+    }
+
+    .desc {
+      margin: 0;
+      padding: 10px 16px 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    pre.code {
+      margin: 12px 16px;
+      padding: 14px 16px;
+      background: var(--code-bg);
+      border-radius: 8px;
+      overflow-x: auto;
+      line-height: 1.55;
+      position: relative;
+      cursor: text;
+    }
+
+    pre.code:focus-within {
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+
+    pre.code>code {
+      display: block;
+      outline: none;
+      caret-color: var(--text);
+      tab-size: 2;
+    }
+
+    pre.code::after {
+      content: "可編輯 · ⌘/Ctrl + Enter 執行";
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      font: 11px system-ui, sans-serif;
+      color: var(--muted);
+      opacity: 0;
+      transition: opacity .15s;
+      pointer-events: none;
+    }
+
+    pre.code.no-run::after {
+      content: "可編輯";
+    }
+
+    pre.code:hover::after,
+    pre.code:focus-within::after {
+      opacity: 1;
+    }
+
+    .tk-k {
+      color: var(--tk-k);
+    }
+
+    .tk-s {
+      color: var(--tk-s);
+    }
+
+    .tk-c {
+      color: var(--tk-c);
+      font-style: italic;
+    }
+
+    .tk-n {
+      color: var(--tk-n);
+    }
+
+    .tk-f {
+      color: var(--tk-f);
+    }
+
+    .tk-d {
+      color: var(--tk-d);
+      font-weight: 700;
+    }
+
+    .result {
+      margin: 0 16px 12px;
+      padding: 14px 16px;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .result::before {
+      content: "結果";
+      position: absolute;
+      top: -9px;
+      left: 10px;
+      background: var(--panel);
+      padding: 0 6px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .result:empty {
+      display: none;
+    }
+
+    :root[lang=en] .result::before {
+      content: "Result";
+    }
+
+    :root[lang=en] .demo.edited h3::after {
+      content: "edited";
+    }
+
+    :root[lang=en] pre.code::after {
+      content: "Editable · ⌘/Ctrl + Enter to run";
+    }
+
+    :root[lang=en] pre.code.no-run::after {
+      content: "Editable";
+    }
+
+    .log {
+      margin: 0 16px 16px;
+      padding: 10px 14px;
+      background: var(--log-bg);
+      color: var(--log-text);
+      border-radius: 8px;
+      font: 12.5px/1.6 ui-monospace, Menlo, monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .log::before {
+      content: "console";
+      display: block;
+      color: #7d838c;
+      font-size: 11px;
+      margin-bottom: 2px;
+    }
+
+    .log:empty {
+      display: none;
+    }
+
+    /* 範例用樣式 */
+    .result button {
+      font: inherit;
+      padding: 4px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .result input:not([type]),
+    .result input[type=number],
+    .result textarea,
+    .result select {
+      font: inherit;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      max-width: 100%;
+    }
+
+    .result p {
+      margin: 6px 0;
+    }
+
+    .result pre {
+      background: var(--code-bg);
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin: 8px 0 0;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 10px;
+      margin: 0 6px 6px 0;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .tag.blue {
+      background: #1f6feb;
+      color: #fff;
+      border-color: #1f6feb;
+    }
+
+    .tag.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    .tag.error {
+      background: crimson;
+      color: #fff;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 6px 0;
+      flex-wrap: wrap;
+    }
+
+    .row>span:first-child {
+      width: 48px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .addr {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+    }
+
+    .addr button {
+      padding: 0 10px;
+    }
+
+    .addr code {
+      flex: 1;
+      padding: 2px 8px;
+      color: var(--muted);
+    }
+
+    .result nav.tabs {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .result nav.tabs a {
+      padding: 3px 12px;
+      border-radius: 999px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .result nav.tabs a.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      margin: 6px 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .user-card .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+    }
+
+    .user-card>div {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.3;
+    }
+
+    .user-card small {
+      color: var(--muted);
+    }
+
+    .user-card button.on {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .stars i {
+      cursor: pointer;
+      font-style: normal;
+      font-size: 20px;
+      color: var(--accent);
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 8px 0;
+      overflow: hidden;
+    }
+
+    .panel>header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      background: var(--code-bg);
+      font-weight: 600;
+    }
+
+    .panel>header button {
+      padding: 0 8px;
+    }
+
+    .panel>.body {
+      padding: 8px 12px;
+    }
+
+    .panel.warn>header {
+      background: #f5c04a;
+      color: #000;
+    }
+
+    .skeleton {
+      display: block;
+      height: 48px;
+      margin: 6px 0;
+      border-radius: 10px;
+      background: linear-gradient(90deg, var(--code-bg), var(--border), var(--code-bg));
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+    }
+
+    @keyframes shimmer {
+      to {
+        background-position: -200% 0;
+      }
+    }
+
+    .fade-enter-active,
+    .fade-leave-active {
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .fade-enter-from,
+    .fade-leave-to {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+
+    .slide-enter-active,
+    .slide-leave-active {
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .slide-enter-from {
+      opacity: 0;
+      transform: translateX(-24px);
+    }
+
+    .slide-leave-to {
+      opacity: 0;
+      transform: translateX(24px);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fade-enter-active,
+      .fade-leave-active,
+      .slide-enter-active,
+      .slide-leave-active {
+        transition: none;
+      }
+    }
+
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      background: rgba(0, 0, 0, 0.45);
+    }
+
+    .modal-box {
+      min-width: 260px;
+      max-width: calc(100vw - 32px);
+      padding: 20px;
+      border-radius: 12px;
+      background: var(--panel);
+      color: var(--text);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-box h3 {
+      margin-bottom: 8px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: 12px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .layout aside a {
+      display: block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .layout aside a.active {
+      background: var(--accent-soft);
+      font-weight: 600;
+    }
+
+    .layout h4 {
+      margin: 0 0 6px;
+    }
+
+    .result table td,
+    .result table th {
+      padding: 4px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .shadow {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+    }
+
+    .result ul,
+    .result ol {
+      margin: 8px 0;
+      padding-left: 22px;
+    }
+
+    .result li {
+      margin: 4px 0;
+    }
+
+    .result li button {
+      margin-left: 6px;
+      padding: 0 8px;
+    }
+
+    @media (max-width: 760px) {
+      #layout {
+        grid-template-columns: 1fr;
+      }
+
+      #nav {
+        position: sticky;
+        z-index: 10;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg);
+        padding: 8px 16px;
+      }
+
+      .toc {
+        display: flex;
+        gap: 4px;
+        overflow-x: auto;
+        align-items: center;
+      }
+
+      .toc a {
+        white-space: nowrap;
+      }
+
+      .toc-group {
+        display: none;
+      }
+
+      .brand {
+        font-size: 16px;
+        padding: 0 8px 0 0;
+      }
+
+      .ver {
+        display: none;
+      }
+
+      .lang {
+        margin: 0 8px 0 0;
+        flex: none;
+      }
+
+      #main {
+        padding: 16px 16px 80px;
+      }
+
+      h1 {
+        font-size: 30px;
+      }
+
+      pre.code,
+      .result,
+      .log {
+        margin-left: 12px;
+        margin-right: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="layout">
+    <aside id="nav"></aside>
+    <main id="main"></main>
+  </div>
+
+  <script src="src/juicy.js"></script>
+  <script src="docs/i18n-en.js"></script>
+  <script>
+    /* ======================================================================
+     * 每個範例的 code(el, log) 會「原樣」顯示在頁面上並實際執行：
+     *   el  = 下方「結果」區塊   log = 輸出到 console 區塊
+     *   回傳帶有 $unmount() 的物件（例如 vm）時，重新執行前會先呼叫它清理。
+     *   頁面上的程式碼可直接編輯，按「↻ 重新執行」或 ⌘/Ctrl + Enter 執行修改後的版本。
+     * ====================================================================== */
+    const sections = [
+      {
+        id: 'install',
+        group: '開始',
+        title: '安裝與匯入',
+        intro: '單一檔案，可以直接用 <code>&lt;script&gt;</code> 載入（建立全域 <code>$</code> 與 <code>juicy</code>），也可以用 ES module / CommonJS 匯入，並附有 TypeScript 型別。',
+        api: [
+          ['<script src="src/juicy.js"><\/script>', '直接在頁面載入，建立全域 <code>$</code> / <code>juicy</code>'],
+          ["import $ from 'juicy'", "ES module（<code>dist/juicy.mjs</code>），不會建立全域變數；也可以具名匯入：<code>import { reactive, defineStore } from 'juicy'</code>"],
+          ["const $ = require('juicy')", 'CommonJS（Node / 舊版打包工具）'],
+          ['types/juicy.d.ts', 'TypeScript 型別：store 的 state / getters / actions、resource 的資料型別都能自動推斷'],
+          ['npm run build', '由 <code>src/juicy.js</code> 產生 <code>dist/juicy.mjs</code>；<code>npm test</code> 會檢查兩者是否一致'],
+        ],
+        demos: [],
+      },
+      {
+        id: 'create',
+        group: '建立畫面',
+        title: '建立元素 $()',
+        intro: '<code>$()</code> 只會建立<strong>虛擬節點</strong>（純 JS 物件），所有鏈式操作都在記憶體中進行，直到 <code>mount()</code> 才一次產生真實 DOM。',
+        api: [
+          ["$('div')", '以標籤名建立元素'],
+          ["$('div#id.a.b')", '選擇器語法同時設定 id 與 class'],
+          ["$('<div>')", '可加上角括號，jQuery 習慣寫法'],
+          ["$('#id') / $('.a')", '省略標籤時預設為 <code>div</code>'],
+          ["$(chain)", '傳入既有的鏈式物件會原樣回傳'],
+        ],
+        demos: [
+          {
+            title: '各種建立方式',
+            code(el, log) {
+              $('div').append(
+                $('div#box.card.shadow').text("$('div#box.card.shadow')"),
+                $('<p>').text("$('<p>') 也可以"),
+                $('.card').text("$('.card') 省略標籤 → div")
+              ).mount(el);
+              log(el.innerHTML);
+            },
+          },
+          {
+            title: 'mount() 之前不會碰真實 DOM',
+            code(el, log) {
+              const chain = $('p').text('我是虛擬節點').css({ color: 'teal' });
+              log('mount 前 vnode.el =', chain.vnode.el);
+              log('vnode =', JSON.stringify({ tag: chain.vnode.tag, style: chain.vnode.style }));
+              chain.mount(el);
+              log('mount 後 vnode.el =', chain.vnode.el.outerHTML);
+            },
+          },
+        ],
+      },
+      {
+        id: 'css',
+        group: '建立畫面',
+        title: '樣式 css()',
+        api: [
+          ['.css({ k: v, ... })', '一次設定多個樣式'],
+          ['.css(name, value)', '設定單一樣式'],
+          ['.css(name)', '讀取已設定的值（回傳值，之後不能再接鏈式呼叫）'],
+        ],
+        intro: '支援 camelCase、kebab-case 與 CSS 變數（<code>--x</code>）。數字會自動補 <code>px</code>，<code>opacity</code>、<code>zIndex</code>、<code>fontWeight</code>、<code>lineHeight</code>、<code>flex</code> 等無單位屬性除外。',
+        demos: [
+          {
+            title: '設定樣式',
+            code(el, log) {
+              $('div').append(
+                $('p').text('物件寫法').css({ color: '#FFCC00', background: '#333', padding: 8, fontWeight: 700 }),
+                $('p').text('鍵值寫法').css('color', 'tomato'),
+                $('p').text('kebab-case + CSS 變數').css({ '--c': 'teal', 'border-left': '4px solid var(--c)', paddingLeft: 8 }),
+                $('p').text('數字自動補 px').css({ fontSize: 20, opacity: 0.6 })
+              ).mount(el);
+              log("讀取：", $('p').css({ color: 'red' }).css('color'));
+            },
+          },
+        ],
+      },
+      {
+        id: 'attr',
+        group: '建立畫面',
+        title: '屬性 attr / prop / id',
+        api: [
+          ['.attr({...}) / .attr(k, v) / .attr(k)', 'HTML attribute。值為 <code>true</code> 設為空字串，<code>false</code> / <code>null</code> 移除'],
+          ['.prop({...}) / .prop(k, v) / .prop(k)', 'DOM property（如 <code>checked</code>、<code>value</code>、<code>indeterminate</code>）'],
+          ['.id(value)', '設定 id'],
+        ],
+        demos: [
+          {
+            title: 'attribute 與 property',
+            code(el, log) {
+              $('div').append(
+                $('a').attr({ href: 'https://example.com', target: '_blank' }).text('attr 物件寫法'),
+                $('p').append(
+                  $('input').attr('placeholder', 'attr 鍵值寫法').id('my-input'),
+                  ' ',
+                  $('button').attr('disabled', true).text('disabled')
+                ),
+                $('label').append(
+                  $('input').attr('type', 'checkbox').prop('indeterminate', true),
+                  ' prop 設定 indeterminate'
+                )
+              ).mount(el);
+              log(el.querySelector('#my-input').outerHTML);
+            },
+          },
+        ],
+      },
+      {
+        id: 'class',
+        group: '建立畫面',
+        title: 'Class',
+        api: [
+          ["addClass('a b') / addClass('a', 'b')", '加入 class'],
+          ['addClass({ a: cond })', '依條件加入；值為 false 則不加入'],
+          ['removeClass(...names)', '移除 class'],
+          ['toggleClass(name, force?)', '切換 class'],
+        ],
+        demos: [
+          {
+            title: '操作 class',
+            code(el, log) {
+              const isActive = true, isError = false;
+              $('div').append(
+                $('span').addClass('tag', 'blue').text("addClass('tag', 'blue')"),
+                $('span').addClass('tag blue').removeClass('blue').text('removeClass'),
+                $('span').addClass('tag').addClass({ active: isActive, error: isError }).text('條件式'),
+                $('span').addClass('tag').toggleClass('active').text('toggleClass')
+              ).mount(el);
+              log(el.innerHTML);
+            },
+          },
+        ],
+      },
+      {
+        id: 'content',
+        group: '建立畫面',
+        title: '內容 text / html',
+        api: [
+          ['.text(str)', '設定文字內容（會跳脫 HTML，安全）'],
+          ['.html(str)', '直接設定 innerHTML（請勿放入不可信的內容）'],
+        ],
+        demos: [
+          {
+            title: 'text 與 html 的差異',
+            code(el) {
+              $('div').append(
+                $('p').text('<b>text() 會顯示原始標籤</b>'),
+                $('p').html('<b>html()</b> 會解析成 <i>HTML</i>')
+              ).mount(el);
+            },
+          },
+        ],
+      },
+      {
+        id: 'tree',
+        group: '建立畫面',
+        title: '結構 append / child',
+        api: [
+          ['.append(...children)', '加在既有子節點之後。接受 <code>$()</code>、字串、陣列（自動攤平），<code>null</code> / <code>false</code> 會忽略'],
+          ['.appendTo(parent)', '把自己加到 parent 底下，回傳自己'],
+          ["child('li') … .end()", '建立子元素並進入它，<code>end()</code> 回到父層'],
+        ],
+        demos: [
+          {
+            title: 'append：各種子節點型別',
+            code(el) {
+              const loggedIn = false;
+              $('div').append(
+                $('b').text('元素'),
+                ' 純字串會變成文字節點 ',
+                [$('i').text('陣列'), ' 會自動攤平 '],
+                loggedIn && $('span').text('false 會被忽略'),
+                null
+              ).mount(el);
+            },
+          },
+          {
+            title: 'child / end：jQuery 風格巢狀',
+            code(el) {
+              $('nav')
+                .child('a').attr('href', '#tree').text('首頁').end()
+                .child('a').attr('href', '#tree').text('文件').css({ marginLeft: 12 }).end()
+                .child('a').attr('href', '#tree').text('關於').css({ marginLeft: 12 }).end()
+                .mount(el);
+            },
+          },
+          {
+            title: 'appendTo',
+            code(el) {
+              const list = $('ol');
+              ['蘋果', '香蕉', '櫻桃'].forEach((f) => $('li').text(f).appendTo(list));
+              list.mount(el);
+            },
+          },
+        ],
+      },
+      {
+        id: 'flow',
+        group: '建立畫面',
+        title: '流程 each / when / show',
+        api: [
+          ['.each(list, (item, i) => chain)', '對每一項 append 回傳的節點'],
+          ['.when(cond, fn, elseFn?)', '條件成立時呼叫 <code>fn(this)</code>，否則 <code>elseFn(this)</code>，不中斷鏈'],
+          ['.show(cond)', '<code>cond</code> 為 false 時設為 <code>display: none</code>'],
+        ],
+        demos: [
+          {
+            title: '列表與條件',
+            code(el) {
+              const users = [
+                { name: 'Amy', admin: true },
+                { name: 'Bob', admin: false },
+                { name: 'Cat', admin: false },
+              ];
+              $('ul')
+                .each(users, (u, i) =>
+                  $('li')
+                    .text(`${i + 1}. ${u.name}`)
+                    .when(u.admin,
+                      (li) => li.append($('b').text('（管理員）')),
+                      (li) => li.css({ color: 'gray' }))
+                )
+                .append($('li').text('show(false) 會隱藏我').show(false))
+                .mount(el);
+            },
+          },
+        ],
+      },
+      {
+        id: 'events',
+        group: '建立畫面',
+        title: '事件 on',
+        api: [
+          ["on('click', fn)", '綁定事件；handler 的 <code>this</code> 為真實 DOM 元素'],
+          ["on('focus blur', fn)", '以空白分隔一次綁定多個事件'],
+          ["on('submit.prevent', fn)", '修飾符：<code>.prevent</code> 呼叫 preventDefault、<code>.stop</code> 停止冒泡、<code>.self</code> 只在事件發生在元素本身時觸發、<code>.once</code> 只觸發一次'],
+          ["on('keydown.enter', fn)", '按鍵：<code>.enter</code> <code>.esc</code> <code>.space</code> <code>.tab</code> <code>.up</code> <code>.down</code> <code>.left</code> <code>.right</code> <code>.delete</code>，或任何 <code>e.key</code>（如 <code>.a</code>、<code>.page-down</code>）'],
+          ["on('keydown.ctrl.s', fn)", '系統鍵：<code>.ctrl</code> <code>.alt</code> <code>.shift</code> <code>.meta</code>；加上 <code>.exact</code> 表示不能同時按其他系統鍵'],
+          ["on('scroll.passive', fn)", '原生選項 <code>.capture</code> / <code>.passive</code>；滑鼠按鍵 <code>.left</code> / <code>.middle</code> / <code>.right</code>'],
+        ],
+        intro: '每種事件在真實元素上只會有一個 listener；重新渲染時只替換 handler，不會重複綁定。',
+        demos: [
+          {
+            title: '點擊與多事件',
+            code(el, log) {
+              let n = 0;
+              $('div').append(
+                $('button').text('點我').on('click', (e) => log('click #' + ++n, e.type)),
+                ' ',
+                $('input').attr('placeholder', 'focus / blur').on('focus blur', function (e) {
+                  log(e.type, '→', this.tagName);
+                })
+              ).mount(el);
+            },
+          },
+          {
+            title: '事件修飾符',
+            desc: '在輸入框按 Enter 新增、Esc 清空、⌘/Ctrl + S 儲存（不會觸發瀏覽器的另存新檔）；送出表單不會重新整理頁面。',
+            code(el, log) {
+              const s = $.reactive({ text: '', items: [] });
+              const h = $.render(() =>
+                $('form').on('submit.prevent', () => log('submit（已 preventDefault，頁面沒有重新整理）')).append(
+                  $('input').attr('placeholder', 'Enter 新增、Esc 清空').model(s, 'text')
+                    .on('keydown.enter.prevent', () => {
+                      if (s.text) s.items.push(s.text);
+                      s.text = '';
+                    })
+                    .on('keydown.esc', () => (s.text = ''))
+                    .on('keydown.ctrl.s.prevent keydown.meta.s.prevent', () => log('儲存：', JSON.stringify(s.items))),
+                  ' ',
+                  $('button').text('送出'),
+                  $('ul').each(s.items, (it) => $('li').text(it)),
+                  $('div.card').on('click.self', () => log('點到卡片本身（點按鈕不會觸發）')).append(
+                    $('button').attr('type', 'button').text('只觸發一次').on('click.once', () => log('once！之後再點不會觸發'))
+                  )
+                ), el);
+              return { $unmount: h.unmount };
+            },
+          },
+        ],
+      },
+      {
+        id: 'mount',
+        group: '建立畫面',
+        title: '掛載 mount',
+        intro: '卸載會：從頁面移除真實 DOM、解除所有事件監聽、斷開 vnode 與 DOM 的參照，讓記憶體可以被回收；若其中有元素又被當成其他 mount 的容器，也會一併卸載。同一個容器再次 mount 時，會自動先卸載舊內容。（<code>$.app</code> 的卸載見「實例 vm」）',
+        api: [
+          ['chain.mount(target)', '產生真實 DOM 並掛到 target（選擇器或元素），清空 target 原內容；回傳 chain 本身。已掛載過會先釋放舊 DOM 再搬過去'],
+          ['$.render(chain, target)', '同 <code>chain.mount</code>'],
+          ['$.render(() => chain, target)', '<strong>響應式渲染</strong>：函式內讀到的 reactive 資料變動時，自動 diff + patch'],
+          ['$.render 回傳值', '<code>{ el, update(), stop(), unmount() }</code>'],
+        ],
+        demos: [
+          {
+            title: '$.render 響應式渲染（不使用 $.app）',
+            desc: '每秒修改 <code>state.time</code>，只有文字節點被更新。',
+            code(el) {
+              const state = $.reactive({ time: new Date().toLocaleTimeString() });
+              const handle = $.render(() => $('h3').text('⏰ ' + state.time), el);
+              const timer = setInterval(() => {
+                state.time = new Date().toLocaleTimeString();
+              }, 1000);
+              return { $unmount() { clearInterval(timer); handle.unmount(); } };
+            },
+          },
+        ],
+      },
+      {
+        id: 'app',
+        group: '資料驅動',
+        title: 'MVVM $.app',
+        intro: '<code>view(vm)</code> 回傳整棵畫面。資料變動時重新執行 <code>view</code> 產生新的虛擬樹，與舊樹比對後只更新差異；同一個 tick 內的多次修改只會重繪一次。',
+        api: [
+          ['data', '物件或回傳物件的函式，會轉為 reactive'],
+          ['computed', '<code>{ k() {} }</code> 或 <code>{ k: { get, set } }</code>，具快取'],
+          ['methods', '方法，<code>this</code> 綁定為 vm'],
+          ['watch', "<code>{ 'a.b'(n, o) {} }</code> 或 <code>{ k: { handler, deep, immediate } }</code>"],
+          ['created / mounted / unmounted', '生命週期'],
+          ['view(vm)', '必填，回傳畫面（單一根節點，或陣列表示多個根節點）'],
+          ['provide / inject / errorCaptured', '與元件相同，見「元件進階」與「錯誤處理」'],
+          ['$.app(opts).mount(target)', '掛載並回傳 vm'],
+        ],
+        demos: [
+          {
+            title: '計數器：data / computed / methods / watch / 生命週期',
+            code(el, log) {
+              return $.app({
+                data: { count: 0 },
+                computed: {
+                  double() { return this.count * 2; },
+                },
+                methods: {
+                  inc() { this.count++; },
+                  reset() { this.count = 0; },
+                },
+                watch: {
+                  count(n, o) { log(`watch count: ${o} → ${n}`); },
+                },
+                created() { log('created'); },
+                mounted() { log('mounted'); },
+                unmounted() { log('unmounted'); },
+                view(vm) {
+                  return $('div').append(
+                    $('p').text(`count = ${vm.count}，double = ${vm.double}`)
+                      .css({ color: vm.count >= 5 ? 'crimson' : 'inherit' }),
+                    $('button').text('+1').on('click', vm.inc),
+                    ' ',
+                    $('button').text('重設').on('click', vm.reset)
+                  );
+                },
+              }).mount(el);
+            },
+          },
+          {
+            title: '可寫的 computed（get / set）',
+            code(el) {
+              return $.app({
+                data: { last: '王', first: '小明' },
+                computed: {
+                  full: {
+                    get() { return this.last + this.first; },
+                    set(v) { this.last = v.slice(0, 1); this.first = v.slice(1); },
+                  },
+                },
+                view(vm) {
+                  return $('div').append(
+                    $('p').text(`姓：${vm.last}　名：${vm.first}`),
+                    $('input').model('full')
+                  );
+                },
+              }).mount(el);
+            },
+          },
+          {
+            title: 'watch：路徑、deep、immediate',
+            code(el, log) {
+              return $.app({
+                data: { user: { name: 'Amy', tags: [] } },
+                watch: {
+                  'user.name'(n, o) { log(`user.name: ${o} → ${n}`); },
+                  user: {
+                    deep: true,
+                    immediate: true,
+                    handler(v) { log('deep:', JSON.stringify(v)); },
+                  },
+                },
+                view(vm) {
+                  return $('div').append(
+                    $('input').model('user.name'),
+                    ' ',
+                    $('button').text('加 tag').on('click', () => vm.user.tags.push('t' + vm.user.tags.length))
+                  );
+                },
+              }).mount(el);
+            },
+          },
+        ],
+      },
+      {
+        id: 'model',
+        group: '資料驅動',
+        title: '雙向綁定 model',
+        api: [
+          ["model('key')", '在 <code>$.app</code> 的 view 中使用，綁到 <code>vm.key</code>（支援 <code>a.b.c</code> 路徑）'],
+          ["model(obj, 'key')", '綁到任意 reactive 物件（可用在 view 之外，或綁到列表項目）'],
+          ['選項 { number, trim, lazy }', '轉數字、去空白、改用 change 事件同步'],
+        ],
+        intro: '依元素決定綁定方式：文字輸入框 / textarea 用 <code>value</code> + <code>input</code>，select 用 <code>change</code>，checkbox 綁布林值，radio 綁 <code>value</code>。<strong>input 請先 <code>.attr(\'type\', …)</code> 再 <code>.model()</code>。</strong>',
+        demos: [
+          {
+            title: '所有表單元件',
+            code(el) {
+              return $.app({
+                data: { text: '', age: 18, bio: '', agree: false, gender: 'f', city: 'tpe', lazy: '' },
+                view(vm) {
+                  const row = (label, ...input) => $('div.row').append($('span').text(label), ...input);
+                  return $('div').append(
+                    row('文字', $('input').model('text', { trim: true }).attr('placeholder', 'trim')),
+                    row('數字', $('input').attr('type', 'number').model('age', { number: true })),
+                    row('多行', $('textarea').model('bio')),
+                    row('勾選', $('input').attr('type', 'checkbox').model('agree')),
+                    row('單選', ['f', 'm'].map((g) =>
+                      $('label').append(
+                        $('input').attr({ type: 'radio', name: 'demo-gender', value: g }).model('gender'),
+                        g === 'f' ? ' 女' : ' 男'
+                      ))),
+                    row('下拉', $('select').model('city').append(
+                      $('option').attr('value', 'tpe').text('台北'),
+                      $('option').attr('value', 'khh').text('高雄')
+                    )),
+                    row('lazy', $('input').model('lazy', { lazy: true }).attr('placeholder', '離開欄位才同步')),
+                    $('pre').text(JSON.stringify(vm.$state, null, 2))
+                  );
+                },
+              }).mount(el);
+            },
+          },
+        ],
+      },
+      {
+        id: 'keyed',
+        group: '資料驅動',
+        title: '列表與 key',
+        intro: '列表項目加上 <code>.key(id)</code> 後，重新排序或插入時會<strong>搬移</strong>既有的 DOM 節點，而不是重建，因此輸入框內容、焦點等狀態會被保留。',
+        api: [['.key(k)', '設定節點的 key（同層需唯一）']],
+        demos: [
+          {
+            title: '在輸入框打字後按「打亂」',
+            code(el) {
+              let uid = 4;
+              return $.app({
+                data: { items: [{ id: 1, t: 'A' }, { id: 2, t: 'B' }, { id: 3, t: 'C' }] },
+                methods: {
+                  shuffle() { this.items = [...this.items].sort(() => Math.random() - 0.5); },
+                  add() { this.items.unshift({ id: uid, t: String.fromCharCode(64 + uid++) }); },
+                  remove(id) { this.items = this.items.filter((i) => i.id !== id); },
+                },
+                view(vm) {
+                  return $('div').append(
+                    $('button').text('打亂').on('click', vm.shuffle),
+                    ' ',
+                    $('button').text('開頭新增').on('click', vm.add),
+                    $('ul').each(vm.items, (item) =>
+                      $('li').key(item.id).append(
+                        $('b').text(item.t + ' '),
+                        $('input').attr('placeholder', `在 ${item.t} 打字`),
+                        $('button').text('×').on('click', () => vm.remove(item.id))
+                      )
+                    )
+                  );
+                },
+              }).mount(el);
+            },
+          },
+          {
+            title: '綁定列表項目：model(item, key)',
+            code(el) {
+              return $.app({
+                data: {
+                  todos: [
+                    { id: 1, title: '學習虛擬 DOM', done: true },
+                    { id: 2, title: '實作 MVVM', done: false },
+                  ],
+                },
+                computed: {
+                  left() { return this.todos.filter((t) => !t.done).length; },
+                },
+                view(vm) {
+                  return $('div').append(
+                    $('p').text(`剩下 ${vm.left} 項`),
+                    $('ul').each(vm.todos, (todo) =>
+                      $('li').key(todo.id).append(
+                        $('label').append(
+                          $('input').attr('type', 'checkbox').model(todo, 'done'),
+                          $('span').text(' ' + todo.title)
+                            .css({ textDecoration: todo.done ? 'line-through' : 'none' })
+                        )
+                      )
+                    )
+                  );
+                },
+              }).mount(el);
+            },
+          },
+        ],
+      },
+      {
+        id: 'instance',
+        group: '資料驅動',
+        title: '實例 vm',
+        api: [
+          ['vm.xxx', '讀寫 data / computed，呼叫 methods'],
+          ['vm.$state', '原始的 reactive data 物件'],
+          ['vm.$el', '掛載容器'],
+          ['vm.$refs', '以 <code>.ref(\'name\')</code> 註冊的元素 / 元件，見「參照 ref」'],
+          ['vm.$watch(src, cb, opts)', '<code>src</code> 為路徑字串或函式，回傳停止函式'],
+          ['vm.$nextTick(fn)', '等畫面更新完成後執行，也可 <code>await</code>'],
+          ['vm.$unmount()', '停止所有響應並清空容器'],
+        ],
+        demos: [
+          {
+            title: '從外部操作 vm',
+            desc: '更新是非同步批次的：修改資料後立刻讀 DOM 仍是舊值，<code>$nextTick</code> 之後才是新值。',
+            code(el, log) {
+              const vm = $.app({
+                data: { n: 0 },
+                view: (vm) => $('div').append(
+                  $('span').text(`n = ${vm.n} `),
+                  $('button').text('n++').on('click', () => vm.n++),
+                  ' ',
+                  $('button').text('$unmount').on('click', () => vm.$unmount())
+                ),
+              }).mount(el);
+
+              vm.$watch('n', (v) => log('$watch n =', v));
+              vm.n = 1;
+              log('修改後立刻讀 DOM：', el.textContent);
+              vm.$nextTick(() => log('$nextTick 之後：', el.textContent));
+              return vm;
+            },
+          },
+        ],
+      },
+      {
+        id: 'reactive',
+        group: '資料驅動',
+        title: '響應式底層 API',
+        intro: '<code>$.app</code> 就是由這些 API 組成，也可以單獨使用。',
+        api: [
+          ['$.reactive(obj)', '以 Proxy 包裝一般物件 / 陣列（巢狀物件會延遲轉換）'],
+          ['$.effect(fn)', '立即執行並追蹤依賴，依賴變動時<strong>同步</strong>重新執行；回傳 <code>{ run, stop }</code>'],
+          ['$.computed(getter | { get, set })', '快取的衍生值，以 <code>.value</code> 讀取'],
+          ['$.watch(getter, cb, { deep, immediate })', '值改變時於下一個 tick 呼叫 <code>cb(新, 舊)</code>；回傳停止函式'],
+          ['$.nextTick(fn?)', '等待目前排程的更新完成，回傳 Promise'],
+          ['$.toRaw(proxy)', '取得原始物件'],
+          ['$.markRaw(obj) / $.shallowReactive(obj)', '不追蹤 / 只追蹤第一層，見「效能最佳化」'],
+        ],
+        demos: [
+          {
+            title: 'reactive + effect',
+            code(el, log) {
+              const state = $.reactive({ a: 1, b: 2 });
+              const runner = $.effect(() => log('effect: a + b =', state.a + state.b));
+              state.a = 10;
+              state.b = 20;
+              runner.stop();
+              state.a = 100; // 已停止，不再執行
+              log('stop 後 state.a =', state.a);
+            },
+          },
+          {
+            title: 'computed + watch（批次）',
+            code(el, log) {
+              const s = $.reactive({ price: 100, qty: 2 });
+              const total = $.computed(() => s.price * s.qty);
+              const stop = $.watch(() => total.value, (n, o) => log(`watch total: ${o} → ${n}`));
+              log('total =', total.value);
+              s.qty = 3;
+              s.price = 50; // 同一 tick 修改兩次，watch 只觸發一次
+              log('computed 立即是新值：', total.value);
+              $.nextTick(() => stop());
+            },
+          },
+          {
+            title: '陣列與巢狀物件',
+            code(el, log) {
+              const raw = { list: [1, 2], deep: { x: 1 } };
+              const s = $.reactive(raw);
+              $.effect(() => log('list =', JSON.stringify(s.list), '｜deep.x =', s.deep.x));
+              s.list.push(3);
+              s.deep.x = 2;
+              log('toRaw(s) === raw：', $.toRaw(s) === raw);
+              log('同一物件重複 reactive 回傳同一個 proxy：', $.reactive(raw) === s);
+            },
+          },
+        ],
+      },
+      {
+        id: 'component',
+        group: '元件',
+        title: '元件 $.component',
+        intro: '把畫面拆成可重複使用、<strong>有自己狀態</strong>的區塊。元件寫法與 <code>$.app</code> 相同（data / computed / methods / watch / 生命週期），多了 <code>props</code>（父層傳入，唯讀）與 <code>$emit</code>（通知父層）。父層重繪時只會更新變動的 props，元件內部的狀態與 DOM 都會保留。',
+        api: [
+          ["$.component(name?, { props, emits, data, ..., view })", '定義元件，回傳元件函式。給 <code>name</code> 時會註冊，之後 <code>$(\'name\')</code> 也能建立（建議名稱含 <code>-</code>，避免與 HTML 標籤衝突）'],
+          ['使用', "<code>Counter({ step: 2 })</code>、<code>$(Counter, { step: 2 })</code>、<code>$('my-counter', { step: 2 })</code>；回傳一般的 chain，可接 <code>.key()</code> <code>.on()</code> <code>.addClass()</code> <code>.append()</code> …"],
+          ['props', '<code>{ step: 1 }</code>（預設值）或 <code>[\'step\']</code>；在元件內以 <code>vm.step</code> 讀取。寫入 props 會警告，請改用 <code>$emit</code>'],
+          ['data()', '請用函式，每個實例各自一份；<code>this</code> 可讀到 props'],
+          ["vm.$emit('name', ...args)", '觸發父層 <code>.on(\'name\', fn)</code> 綁定的處理函式'],
+          ['view(vm, children)', '回傳畫面，可以是單一根節點，也可以是陣列（多個根節點，見「片段與 Teleport」）。<code>children</code>（= <code>vm.$children</code>）是父層 <code>.append()</code> 進來的內容（插槽）'],
+          ['根節點合併', '寫在元件上的 <code>.addClass()</code> / <code>.css()</code> / <code>.attr()</code> / <code>.transition()</code> 會加到元件的根元素（只有單一根元素時）；有宣告 <code>emits</code> 時，<strong>未宣告</strong>的事件（如 <code>click</code>）也會綁到根元素上'],
+          [".model('key')", '元件的雙向綁定：傳入 <code>value</code> prop，元件以 <code>vm.$emit(\'input\', 新值)</code> 回報'],
+          ['created / mounted / updated / unmounted', '生命週期；<code>mounted</code> 時元素已在頁面中，可用 <code>vm.$el</code>'],
+          ['$props / $children / $el / $parent / $listeners / $refs', '其他實例屬性；插槽相關的 <code>$slot()</code> / <code>$slots</code> / <code>$hasSlot()</code> 見下一節'],
+        ],
+        demos: [
+          {
+            title: '計數器元件：props、$emit、各自的狀態',
+            desc: '三個實例各自計數；改「步進」只會更新 props，計數不會被重設。',
+            code(el, log) {
+              const Counter = $.component({
+                props: { label: '計數', step: 1 },
+                data: () => ({ count: 0 }),
+                methods: {
+                  inc() {
+                    this.count += this.step;
+                    this.$emit('change', this.label, this.count);
+                  },
+                },
+                view: (vm) => $('div.row').append(
+                  $('span').text(vm.label),
+                  $('button').text(`${vm.count}（+${vm.step}）`).on('click', vm.inc)
+                ),
+              });
+
+              return $.app({
+                data: { step: 1 },
+                view: (vm) => $('div').append(
+                  ['A', 'B', 'C'].map((label) =>
+                    Counter({ label, step: vm.step }).on('change', (l, n) => log(`${l} → ${n}`))
+                  ),
+                  $('div.row').append(
+                    $('span').text('步進'),
+                    $('input').attr('type', 'number').css({ width: 70 }).model('step', { number: true })
+                  )
+                ),
+              }).mount(el);
+            },
+          },
+          {
+            title: '插槽 children、根節點合併、emits',
+            desc: '元件內容由父層傳入；寫在元件上的 class 會加到根元素；<code>close</code> 是元件事件，<code>click</code> 未宣告在 emits，所以直接綁在根元素上。',
+            code(el, log) {
+              const Panel = $.component({
+                props: { title: '' },
+                emits: ['close'],
+                view: (vm, children) => $('div.panel').append(
+                  $('header').append(
+                    $('span').text(vm.title),
+                    $('button').text('×').on('click', (e) => { e.stopPropagation(); vm.$emit('close'); })
+                  ),
+                  $('div.body').append(children)
+                ),
+              });
+
+              const s = $.reactive({ panels: ['公告', '提醒', '說明'] });
+              const h = $.render(() =>
+                $('div').append(
+                  s.panels.map((t, i) =>
+                    Panel({ title: t })
+                      .key(t)
+                      .addClass({ warn: t === '提醒' })
+                      .append($('p').text(`這是「${t}」的內容，由父層傳入。`))
+                      .on('close', () => { s.panels.splice(s.panels.indexOf(t), 1); log('關閉', t); })
+                      .on('click', () => log('點了', t, '（落到根元素的 click）'))
+                  ),
+                  !s.panels.length && $('button').text('全部還原').on('click', () => (s.panels = ['公告', '提醒', '說明']))
+                ), el);
+              return { $unmount: h.unmount };
+            },
+          },
+          {
+            title: '名稱註冊、.model() 雙向綁定、生命週期',
+            code(el, log) {
+              $.component('star-rating', {
+                props: { value: 0, max: 5 },
+                mounted() { log('mounted，$el 在頁面中：', document.contains(this.$el)); },
+                unmounted() { log('unmounted'); },
+                view: (vm) => $('span.stars').each(Array.from({ length: vm.max }), (_, i) =>
+                  $('i').text(i < vm.value ? '★' : '☆').on('click', () => vm.$emit('input', i + 1))
+                ),
+              });
+
+              return $.app({
+                data: { rate: 3, show: true },
+                view: (vm) => $('div').append(
+                  vm.show && $('div.row').append(
+                    $('star-rating').model('rate'),       // 用註冊的名稱建立
+                    $('star-rating', { max: 3 }).model('rate')
+                  ),
+                  $('p').text(`評分：${vm.rate}`),
+                  $('button').text(vm.show ? '移除元件' : '加回元件').on('click', () => (vm.show = !vm.show))
+                ),
+              }).mount(el);
+            },
+          },
+        ],
+      },
+      {
+        id: 'component-advanced',
+        group: '元件',
+        title: '元件進階：插槽與 provide / inject',
+        intro: '具名插槽讓元件有多個可替換的區塊；作用域插槽讓元件把資料交給父層決定怎麼顯示。provide / inject 讓祖先把值傳給任意深度的後代，不必一層層傳 props。',
+        api: [
+          [".slot('name', content)", "傳入具名插槽：<code>Card().slot('header', $('h3').text('標題'))</code>"],
+          [".slot('name', (...args) => content)", "作用域插槽：元件呼叫時傳入資料，例如 <code>List({ items }).slot('item', (item) => $('b').text(item.name))</code>；裡面的 <code>.model()</code> / <code>.ref()</code> 綁到父層"],
+          ["vm.$slot('name', ...args)", '在元件的 view 中渲染插槽，沒有提供時回傳 <code>null</code>（可用 <code>||</code> 接預設內容）；<code>vm.$hasSlot(name)</code> 判斷是否有提供；<code>.append()</code> 的內容就是 <code>default</code> 插槽'],
+          ['provide', '<code>provide: { theme }</code> 或 <code>provide() { return { theme: this.theme } }</code>，<code>$.app</code> 與元件都可以用；要讓後代跟著更新，請 provide reactive 物件'],
+          ['inject', "<code>inject: ['theme']</code>，或 <code>{ color: 'theme' }</code>（別名）、<code>{ size: { from: 'size', default: 'M' } }</code>（預設值）；以 <code>vm.theme</code> 讀取"],
+          ['$.provide(key, value) / $.inject(key, default)', '在元件建立期間（data / created）呼叫時作用在該元件，否則為全域；另有 <code>vm.$provide()</code> / <code>vm.$inject()</code>'],
+        ],
+        demos: [
+          {
+            title: '具名與作用域插槽：可自訂每一格的表格',
+            code(el, log) {
+              const DataTable = $.component({
+                props: { rows: [], columns: [] },
+                view: (vm) => $('div.card').append(
+                  $('div').css({ fontWeight: 700, marginBottom: 6 }).append(vm.$slot('title') || '資料表'),
+                  $('table').css({ width: '100%', borderCollapse: 'collapse' }).append(
+                    $('tr').each(vm.columns, (c) => $('th').css({ textAlign: 'left' }).text(c)),
+                    vm.rows.map((row, i) => $('tr').append(
+                      vm.columns.map((c) => $('td').append(vm.$slot('cell', row, c, i) || String(row[c])))
+                    ))
+                  ),
+                  vm.$hasSlot('footer') && $('div').css({ marginTop: 6, color: 'var(--muted)' }).append(vm.$slot('footer'))
+                ),
+              });
+              const rows = $.reactive([
+                { name: 'Ada', score: 92 },
+                { name: 'Linus', score: 67 },
+                { name: 'Grace', score: 85 },
+              ]);
+              const h = $.render(() =>
+                $('div').append(
+                  DataTable({ rows, columns: ['name', 'score'] })
+                    .slot('title', $('span').text('🏆 成績表'))
+                    .slot('cell', (row, col) => col === 'score'
+                      ? $('span').css({ color: row.score >= 80 ? 'green' : 'crimson' }).text(row.score + (row.score >= 80 ? ' ✓' : ' ✗'))
+                      : null)
+                    .slot('footer', `平均 ${Math.round(rows.reduce((a, r) => a + r.score, 0) / rows.length)} 分`),
+                  $('button').css({ marginTop: 8 }).text('Linus 加 10 分').on('click', () => (rows[1].score += 10))
+                ), el);
+              return { $unmount: h.unmount };
+            },
+          },
+          {
+            title: 'provide / inject：主題設定傳給深層元件',
+            desc: '中間的 <code>Panel</code> 與 <code>Toolbar</code> 完全不知道 theme，最內層的按鈕直接 inject；切換主題時用到它的元件都會更新。',
+            code(el) {
+              const ThemedButton = $.component({
+                inject: ['theme'],
+                props: ['label'],
+                view: (vm) => $('button').css({
+                  background: vm.theme.dark ? '#333' : '#fff',
+                  color: vm.theme.dark ? '#fff' : '#333',
+                  border: '2px solid ' + vm.theme.accent,
+                }).text(vm.label),
+              });
+              const Toolbar = $.component({
+                view: () => $('div.row').append(ThemedButton({ label: '存檔' }), ThemedButton({ label: '分享' })),
+              });
+              const Panel = $.component({
+                view: () => $('div.card').append($('p').text('Panel（沒有傳任何 props）'), $(Toolbar)),
+              });
+
+              return $.app({
+                data: { theme: { dark: false, accent: '#ffcc00' } },
+                provide() {
+                  return { theme: this.theme };
+                },
+                view: () => $('div').append(
+                  $('div.row').append(
+                    $('label').append($('input').attr('type', 'checkbox').model('theme.dark'), ' 深色模式'),
+                    $('input').attr('type', 'color').model('theme.accent')
+                  ),
+                  $(Panel)
+                ),
+              }).mount(el);
+            },
+          },
+        ],
+      },
+      {
+        id: 'import',
+        group: '元件',
+        title: '匯入元件 $.import',
+        intro: '把元件放在獨立檔案，需要時才載入。<code>$.import()</code> <strong>立即</strong>回傳一個元件，可以直接放進畫面：載入中顯示 <code>loading</code>，完成後自動換成真正的元件（props、事件、<code>.model()</code> 都會轉過去）。同一個來源只會載入一次。',
+        api: [
+          ["$.import('./components/x.js')", '以 <code>import()</code> 載入 ES module，路徑相對於<strong>頁面</strong>網址。需透過 http(s) 開啟頁面（<code>file://</code> 下瀏覽器不允許載入模組）'],
+          ["$.import(() => import('./x.js'))", '傳入回傳 Promise 的函式：搭配打包工具，或自訂載入方式'],
+          ['模組可匯出', '<code>$.component(...)</code> 的結果、元件設定物件 <code>{ view, ... }</code>，或 <code>($) => 上述兩者</code>（不依賴全域 <code>$</code>）'],
+          ['選項', "<code>{ name, export, loading, error, eager }</code>：<code>name</code> 註冊成 <code>$(\'name\')</code>；<code>export</code> 指定匯出名稱（預設 <code>default</code>）；<code>loading()</code> 載入中畫面；<code>error(err, retry)</code> 失敗畫面；<code>eager: true</code> 立即開始載入"],
+          ['Comp.load()', '預先載入，回傳 Promise；預設在第一次被渲染時才開始載入'],
+          ['Comp.status()', "<code>'idle' | 'loading' | 'ready' | 'error'</code>"],
+        ],
+        demos: [
+          {
+            title: '模擬網路延遲：loading、失敗與重試',
+            desc: '第一次載入會故意失敗，按「重試」後成功。',
+            code(el, log) {
+              let attempt = 0;
+              const fakeServer = () => new Promise((resolve, reject) => setTimeout(() => {
+                attempt++;
+                log(`第 ${attempt} 次載入`, attempt === 1 ? '❌ 失敗' : '✅ 成功');
+                if (attempt === 1) return reject(new Error('網路錯誤'));
+                resolve({
+                  default: {
+                    props: { name: '', role: '' },
+                    view: (vm) => $('div.user-card').append(
+                      $('span.avatar').text(vm.name.slice(0, 1)),
+                      $('div').append($('b').text(vm.name), $('small').text(vm.role))
+                    ),
+                  },
+                });
+              }, 800));
+
+              const UserCard = $.import(fakeServer, {
+                loading: () => $('span.skeleton'),
+                error: (err, retry) => $('div.row').append(
+                  $('span').css({ color: 'crimson', width: 'auto' }).text('載入失敗：' + err.message),
+                  $('button').text('重試').on('click', retry)
+                ),
+              });
+
+              $('div').append(
+                UserCard({ name: 'Ada', role: '工程師' }),
+                UserCard({ name: 'Linus', role: '維護者' })
+              ).mount(el);
+            },
+          },
+          {
+            title: '從檔案匯入：components/user-card.js',
+            desc: '以 http 伺服器開啟本頁才能載入（例如在專案資料夾執行 <code>npx serve</code>）；以 <code>file://</code> 開啟時會顯示錯誤畫面。',
+            code(el, log) {
+              const UserCard = $.import('./components/user-card.js', {
+                loading: () => $('span.skeleton'),
+                error: (err) => $('p').css({ color: 'crimson' }).text('無法載入模組（請用 http 開啟頁面）：' + err.message),
+              });
+
+              $('div').append(
+                ['Grace', 'Alan', 'Margaret'].map((name) =>
+                  UserCard({ name, role: '先驅' }).on('follow', (n, on) => log(n, on ? '已追蹤' : '取消追蹤'))
+                )
+              ).mount(el);
+            },
+          },
+        ],
+      },
+      {
+        id: 'ref',
+        group: '進階畫面',
+        title: '參照 ref',
+        intro: '需要直接操作真實元素（focus、量測尺寸、交給第三方函式庫）或呼叫子元件的方法時使用。',
+        api: [
+          ['.ref((el) => ...)', '掛載時傳入真實元素（用在元件上則是元件的 vm），卸載時傳入 <code>null</code>'],
+          [".ref('name')", '存到所在 view 的 <code>vm.$refs.name</code>（<code>$.app</code> 或元件）；不在任何 view 中則存到 <code>$.refs</code>'],
+        ],
+        demos: [
+          {
+            title: 'focus 輸入框、量測元素、呼叫子元件的方法',
+            code(el, log) {
+              const Timer = $.component({
+                data: () => ({ sec: 0 }),
+                methods: {
+                  reset() {
+                    this.sec = 0;
+                  },
+                },
+                created() {
+                  this.timer = setInterval(() => this.sec++, 1000);
+                },
+                unmounted() {
+                  clearInterval(this.timer);
+                },
+                view: (vm) => $('span.tag').text(`⏱ ${vm.sec}s`),
+              });
+
+              return $.app({
+                data: { text: '' },
+                view: (vm) => $('div').append(
+                  $('div.row').append(
+                    $('input').ref('input').attr('placeholder', '按按鈕讓我取得焦點').model('text'),
+                    $('button').text('focus()').on('click', () => vm.$refs.input.focus())
+                  ),
+                  $('div.row').append(
+                    $('div.card').ref('box').css({ width: 140 + vm.text.length * 8 }).text('寬度隨文字變化'),
+                    $('button').text('量測').on('click', () => {
+                      const r = vm.$refs.box.getBoundingClientRect();
+                      log(`box：${Math.round(r.width)} × ${Math.round(r.height)}`);
+                    })
+                  ),
+                  $('div.row').append(
+                    $(Timer).ref('timer'),
+                    $('button').text('呼叫 timer.reset()').on('click', () => vm.$refs.timer.reset())
+                  )
+                ),
+              }).mount(el);
+            },
+          },
+        ],
+      },
+      {
+        id: 'transition',
+        group: '進階畫面',
+        title: '動畫 transition',
+        intro: '元素加入時依序套用 <code>名稱-enter-from</code> → <code>名稱-enter-active</code> → <code>名稱-enter-to</code>，移除時套用 <code>名稱-leave-*</code>，並等 CSS transition / animation 結束才真的移除元素。第一次渲染預設不跑進場動畫（<code>appear: true</code> 可開啟）。',
+        api: [
+          [".transition('fade')", '使用 <code>fade-*</code> class（CSS 自己寫）；用在元件上會套用到元件的根元素'],
+          ['.transition({ name, appear, duration, ... })', '<code>duration</code> 省略時從 CSS 推算；另有 <code>onBeforeEnter</code> / <code>onAfterEnter</code> / <code>onBeforeLeave</code> / <code>onAfterLeave</code>'],
+          ['CSS', '<code>.fade-enter-active, .fade-leave-active { transition: opacity .3s }</code><br><code>.fade-enter-from, .fade-leave-to { opacity: 0 }</code>'],
+        ],
+        demos: [
+          {
+            title: '切換顯示與列表增減',
+            code(el, log) {
+              const s = $.reactive({ show: true, list: [1, 2, 3], next: 4 });
+              const h = $.render(() =>
+                $('div').append(
+                  $('div.row').append(
+                    $('button').text(s.show ? '隱藏卡片' : '顯示卡片').on('click', () => (s.show = !s.show)),
+                    $('button').text('隨機插入').on('click', () => s.list.splice(Math.floor(Math.random() * (s.list.length + 1)), 0, s.next++)),
+                    $('button').text('移除第一項').on('click', () => s.list.shift())
+                  ),
+                  s.show && $('p.card').transition({ name: 'fade', onAfterLeave: () => log('離場動畫結束，元素已移除') }).text('淡入淡出的卡片'),
+                  $('ul').each(s.list, (n) => $('li').key(n).transition('slide').text('項目 ' + n))
+                ), el);
+              return { $unmount: h.unmount };
+            },
+          },
+        ],
+      },
+      {
+        id: 'fragment',
+        group: '進階畫面',
+        title: '片段與 Teleport',
+        intro: '片段讓 view / 元件可以回傳多個節點，不必多包一層元素；Teleport 把內容渲染到別的容器（例如 <code>body</code>），常用於對話框與提示訊息，避免被父層的 <code>overflow</code> 或 <code>z-index</code> 擋住。',
+        api: [
+          ['view 回傳陣列', "<code>view: () => [$('dt'), $('dd')]</code>：元件可以有多個根節點"],
+          ['$.fragment(...children)', '明確建立片段，可以加 <code>.key()</code>'],
+          ['$.teleport(target, ...children)', '把子節點渲染到 <code>target</code>（選擇器或元素）；target 改變時會搬過去，父層移除時一併移除'],
+        ],
+        demos: [
+          {
+            title: '多根節點元件：定義清單',
+            code(el) {
+              const Term = $.component({
+                props: ['word', 'desc'],
+                view: (vm) => [$('dt').css({ fontWeight: 700 }).text(vm.word), $('dd').text(vm.desc)],
+              });
+              $('dl').append(
+                Term({ word: 'vnode', desc: '描述畫面的純 JS 物件' }),
+                Term({ word: 'patch', desc: '比對新舊 vnode 後只更新差異' })
+              ).mount(el);
+            },
+          },
+          {
+            title: 'Teleport：對話框渲染到 body',
+            desc: '按鈕所在的區塊設了 <code>overflow: hidden</code>，對話框的 DOM 卻在 <code>body</code> 底下，所以不會被裁掉。點背景或在輸入框按 Esc 可以關閉。',
+            code(el, log) {
+              const s = $.reactive({ open: false, name: '' });
+              const close = () => (s.open = false);
+              const h = $.render(() =>
+                $('div').css({ overflow: 'hidden', height: 40 }).append(
+                  $('button').text('開啟對話框').on('click', () => (s.open = true)),
+                  s.open && $.teleport('body',
+                    $('div.modal-mask').transition('fade').on('click.self', close)
+                      .ref((mask) => mask && log('對話框的父元素：', mask.parentNode.tagName))
+                      .append(
+                        $('div.modal-box').append(
+                          $('h3').text('Teleport 對話框'),
+                          $('input').attr('placeholder', '輸入名字，Esc 關閉').model(s, 'name').on('keydown.esc', close),
+                          $('div.row').css({ marginTop: 12 }).append(
+                            $('button').text('確定').on('click', () => {
+                              log('你好，' + (s.name || '訪客'));
+                              close();
+                            }),
+                            $('button').text('取消並關閉').on('click', close)
+                          )
+                        )
+                      )
+                  )
+                ), el);
+              return { $unmount: h.unmount };
+            },
+          },
+        ],
+      },
+      {
+        id: 'svg',
+        group: '進階畫面',
+        title: 'SVG',
+        intro: '在 <code>svg</code> 底下的節點會自動以 SVG namespace 建立。',
+        demos: [
+          {
+            title: '響應式 SVG',
+            code(el) {
+              return $.app({
+                data: { r: 18 },
+                view(vm) {
+                  return $('div').append(
+                    $('svg').attr({ width: 160, height: 80, viewBox: '0 0 160 80' }).append(
+                      $('rect').attr({ width: 160, height: 80, rx: 10, fill: '#FFCC00' }),
+                      $('circle').attr({ cx: 80, cy: 40, r: vm.r, fill: '#333' })
+                    ),
+                    $('div').append(
+                      $('input').attr({ type: 'range', min: 4, max: 38 }).model('r', { number: true })
+                    )
+                  );
+                },
+              }).mount(el);
+            },
+          },
+        ],
+      },
+      {
+        id: 'errors',
+        group: '進階畫面',
+        title: '錯誤處理',
+        intro: '元件的 view、生命週期、事件處理函式或 watch 丟出錯誤時，不會讓整個畫面壞掉：出錯的元件保留上一次的畫面（第一次渲染則是空白），錯誤會往上傳給祖先元件的 <code>errorCaptured</code>，最後交給 <code>$.onError</code>；都沒有處理時印到 console。',
+        api: [
+          ['$.ErrorBoundary({ fallback }, ...children)', '內建錯誤邊界：子元件出錯時改顯示 <code>fallback(error, reset)</code>，呼叫 <code>reset()</code> 重新渲染子元件'],
+          ['errorCaptured(err, vm, info)', '元件選項：後代元件出錯時呼叫；回傳 <code>false</code> 表示已處理，不再往上傳'],
+          ['$.onError((err, vm, info) => ...)', '全域錯誤處理（例如回報到監控服務），回傳取消函式'],
+        ],
+        demos: [
+          {
+            title: 'ErrorBoundary：只有出錯的區塊換成錯誤畫面',
+            code(el, log) {
+              const off = $.onError((err, vm, info) => log('$.onError：', info, '→', err.message));
+              const Profile = $.component({
+                props: ['user'],
+                view: (vm) => $('p').text(`${vm.user.name}（${vm.user.address.city}）`),
+              });
+              const s = $.reactive({ user: { name: 'Ada', address: { city: '倫敦' } } });
+              const h = $.render(() =>
+                $('div').append(
+                  $('div.row').append(
+                    $('button').text('讓資料缺少 address').on('click', () => (s.user = { name: 'Bob' })),
+                    $('button').text('事件處理函式丟出錯誤').on('click', () => {
+                      throw new Error('按鈕壞掉了');
+                    })
+                  ),
+                  $.ErrorBoundary({
+                    fallback: (err, reset) => $('div.card').css({ borderColor: 'crimson' }).append(
+                      $('p').css({ color: 'crimson' }).text('⚠ 這個區塊出錯了：' + err.message),
+                      $('button').text('修正資料並重試').on('click', () => {
+                        s.user = { name: 'Ada', address: { city: '倫敦' } };
+                        reset();
+                      })
+                    ),
+                  }, Profile({ user: s.user })),
+                  $('p').css({ color: 'var(--muted)' }).text('這一行在邊界外面，不受影響')
+                ), el);
+              return { $unmount() { h.unmount(); off(); } };
+            },
+          },
+        ],
+      },
+      {
+        id: 'router',
+        group: '應用架構',
+        title: '路由 $.router',
+        intro: '依網址切換內容。<code>router.route</code> 是 reactive 物件，<code>router.view()</code> 在 <code>$.render</code> / <code>$.app</code> 的 view 裡呼叫，路由一變就 diff + patch，不會重新載入頁面。下面的範例用 <code>memory</code> 模式，避免改動本頁網址；實際使用預設是 <code>hash</code>。',
+        api: [
+          ['$.router({ routes, mode, ... })', '建立路由。<code>mode</code>：<code>hash</code>（預設，<code>#/path</code>）/ <code>history</code>（需伺服器把所有路徑導回 index.html，可搭配 <code>base</code>）/ <code>memory</code>（不碰網址，可用 <code>initial</code> 設起始路徑）'],
+          ['routes', "<code>{ '/': view, '/user/:id': view, '/docs/*': view, '/old': '/new', '*': view }</code>。<code>view(route, router, outlet)</code> 回傳 <code>$()</code> 鏈（outlet 用於巢狀路由）；字串代表轉址；<code>*</code> 是找不到時的頁面，永遠最後比對"],
+          ['巢狀路由 children', "<code>{ view: (route, router, outlet) => ..., children: { '': Home, 'users/:id': User } }</code>：子頁面以 <code>outlet</code> 傳給外層 view；切換子頁面時外層 layout 保留"],
+          ['元件當 view', "<code>'/about': About</code>：直接給元件，元件會收到 <code>route</code> prop，巢狀時 outlet 是它的 children；搭配 <code>$.import()</code> 就是延遲載入的頁面"],
+          ['meta', '<code>{ meta: { auth: true } }</code>：從外到內合併成 <code>route.meta</code>，可以在守衛中判斷'],
+          ['router.route', '<code>{ path, fullPath, params, query, matched, meta }</code>，reactive；<code>/docs/*</code> 的剩餘路徑在 <code>params.pathMatch</code>'],
+          ['router.view()', '目前路由的畫面，可和其他節點組合'],
+          ['router.mount(target)', '等同 <code>$.render(() => router.view(), target)</code>'],
+          ['router.push(path, { replace })', '切換路由；<code>replace: true</code> 不新增歷史紀錄。被守衛取消時回傳 <code>false</code>'],
+          ['router.back() / forward() / go(n)', '上一頁 / 下一頁'],
+          ['beforeEach(to, from) / afterEach(to, from)', '守衛：回傳 <code>false</code> 取消、回傳路徑字串則轉址'],
+          ['beforeEnter / beforeLeave', '單一路由的守衛：進入 / 離開該路由（含子路由）時呼叫'],
+          ['router.beforeLeave(fn)', '動態註冊離開確認（例如表單未存檔）；在元件建立期間呼叫時，元件卸載會自動移除'],
+          ['scrollBehavior(to, from, saved)', "切頁後的捲動位置：回傳 <code>{ top, left }</code>、<code>{ el: '#id' }</code> 或 <code>false</code>；上一頁 / 下一頁時 <code>saved</code> 是離開時的位置"],
+          [".link(path, router)", '<code>$(\'a\').link(\'/about\')</code>：設定 href、點擊時用 <code>push</code> 切換（按住 ⌘/Ctrl/Shift 仍交給瀏覽器開新分頁），符合目前路由時加上 <code>active</code>。第二個參數可省略（使用最後建立的 router），或傳 <code>{ router, exact: false, activeClass }</code>'],
+          ['router.href(path) / isActive(path, exact) / resolve(path)', '工具方法'],
+          ['router.stop()', '停止監聽瀏覽器網址變化'],
+        ],
+        demos: [
+          {
+            title: '切換內容：params、轉址、404、上一頁',
+            code(el, log) {
+              const router = $.router({
+                mode: 'memory', // 實際使用時省略 = hash 模式
+                routes: {
+                  '/': () => $('p').text('🏠 首頁'),
+                  '/about': () => $('p').text('ℹ️ juicy.js 是類 jQuery 的虛擬 DOM 函式庫'),
+                  '/user/:id': (route) => $('p').text(`👤 使用者 #${route.params.id}，tab = ${route.query.tab || '（無）'}`),
+                  '/old-page': '/about', // 字串 = 轉址
+                  '*': (route) => $('p').css({ color: 'crimson' }).text(`404：找不到 ${route.path}`),
+                },
+                afterEach: (to, from) => log(from ? from.fullPath : '（初始）', '→', to.fullPath),
+              });
+
+              const handle = $.render(() =>
+                $('div').append(
+                  $('div.addr').append(
+                    $('button').text('←').on('click', () => router.back()),
+                    $('button').text('→').on('click', () => router.forward()),
+                    $('code').text(router.route.fullPath)
+                  ),
+                  $('nav.tabs').append(
+                    $('a').link('/', router).text('首頁'),
+                    $('a').link('/about', router).text('關於'),
+                    $('a').link('/user/7?tab=posts', router).text('使用者 7'),
+                    $('a').link('/old-page', router).text('舊網址'),
+                    $('a').link('/nope', router).text('不存在')
+                  ),
+                  router.view()
+                ), el);
+
+              return { $unmount() { handle.unmount(); router.stop(); } };
+            },
+          },
+          {
+            title: '守衛 beforeEach ＋ reactive 狀態',
+            desc: '未登入時進入「後台」會被轉到登入頁；登入後再進去就能看到。',
+            code(el, log) {
+              const auth = $.reactive({ name: '', user: '' });
+              const router = $.router({
+                mode: 'memory',
+                routes: {
+                  '/': () => $('p').text('公開頁面，誰都能看'),
+                  '/admin': () => $('p').text(`🔐 管理後台，歡迎 ${auth.user}`),
+                  '/login': () => $('div.row').append(
+                    $('input').attr('placeholder', '輸入名字').model(auth, 'name'),
+                    $('button').text('登入').on('click', () => {
+                      if (!auth.name) return log('請輸入名字');
+                      auth.user = auth.name;
+                      router.push('/admin', { replace: true });
+                    })
+                  ),
+                },
+                beforeEach(to) {
+                  if (to.path === '/admin' && !auth.user) {
+                    log('未登入，轉到 /login');
+                    return '/login';
+                  }
+                },
+              });
+
+              const handle = $.render(() =>
+                $('div').append(
+                  $('nav.tabs').append(
+                    $('a').link('/', router).text('公開'),
+                    $('a').link('/admin', router).text('後台'),
+                    auth.user && $('a').attr('href', '#router').text(`登出 ${auth.user}`).on('click', (e) => {
+                      e.preventDefault();
+                      auth.user = auth.name = '';
+                      router.push('/');
+                    })
+                  ),
+                  router.view()
+                ), el);
+
+              return { $unmount() { handle.unmount(); router.stop(); } };
+            },
+          },
+          {
+            title: '搭配 $.app：路由參數 ＋ computed',
+            code(el, log) {
+              const router = $.router({ mode: 'memory', initial: '/item/1', routes: { '/item/:id': () => null } });
+              const items = ['🍎 蘋果', '🍌 香蕉', '🍇 葡萄'];
+
+              return $.app({
+                computed: {
+                  index() { return Number(router.route.params.id) - 1; },
+                },
+                watch: {
+                  index(n) { log('切換到第', n + 1, '項'); },
+                },
+                view: (vm) => $('div').append(
+                  $('nav.tabs').each(items, (_, i) => $('a').link(`/item/${i + 1}`, router).text(String(i + 1))),
+                  $('h3').text(items[vm.index] || '沒有這一項'),
+                  $('div.row').append(
+                    $('button').text('上一項').attr('disabled', vm.index <= 0).on('click', () => router.push(`/item/${vm.index}`)),
+                    $('button').text('下一項').attr('disabled', vm.index >= items.length - 1).on('click', () => router.push(`/item/${vm.index + 2}`))
+                  )
+                ),
+              }).mount(el);
+            },
+          },
+            {
+            title: '巢狀路由、meta 與未存檔確認',
+            desc: '「設定」底下的兩個子頁面共用外層 layout；在「個人資料」改了名字不存檔就離開，會被擋下來。',
+            code(el, log) {
+              const draft = $.reactive({ saved: 'Ada', name: 'Ada', warn: false });
+              const Profile = $.component({
+                created() {
+                  // 在元件建立期間註冊：元件卸載時自動移除
+                  router.beforeLeave(() => {
+                    if (draft.name === draft.saved) return;
+                    draft.warn = true;
+                    log('已阻止離開：名字還沒存檔');
+                    return false;
+                  });
+                },
+                view: () => $('div').append(
+                  $('div.row').append($('span').text('名字'), $('input').model(draft, 'name')),
+                  $('div.row').append(
+                    $('button').text('存檔').on('click', () => {
+                      draft.saved = draft.name;
+                      draft.warn = false;
+                      log('已存檔');
+                    }),
+                    $('button').text('放棄修改').on('click', () => {
+                      draft.name = draft.saved;
+                      draft.warn = false;
+                    })
+                  ),
+                  draft.warn && $('p').css({ color: 'crimson' }).text('⚠ 名字還沒存檔，請先存檔或放棄修改')
+                ),
+              });
+
+              const router = $.router({
+                mode: 'memory',
+                routes: {
+                  '/': () => $('p').text('🏠 首頁'),
+                  '/settings': {
+                    meta: { title: '設定' },
+                    view: (route, r, outlet) => $('div.layout').append(
+                      $('aside').append(
+                        $('a').link('/settings', r).text('總覽'),
+                        $('a').link('/settings/profile', r).text('個人資料')
+                      ),
+                      $('div').append($('h4').text(route.meta.title), outlet)
+                    ),
+                    children: {
+                      '': { view: () => $('p').text('選擇左側的設定項目'), meta: { title: '設定 › 總覽' } },
+                      profile: { view: Profile, meta: { title: '設定 › 個人資料' } },
+                    },
+                  },
+                },
+                afterEach: (to) => log('→', to.fullPath, '｜meta.title =', to.meta.title || '（無）'),
+              });
+
+              const h = $.render(() =>
+                $('div').append(
+                  $('nav.tabs').append(
+                    $('a').link('/', router).text('首頁'),
+                    $('a').link('/settings', { router, exact: false }).text('設定')
+                  ),
+                  router.view()
+                ), el);
+              return { $unmount() { h.unmount(); router.stop(); } };
+            },
+          },
+      ],
+      },
+      {
+        id: 'store',
+        group: '應用架構',
+        title: '全域狀態 $.store',
+        intro: '跨元件、跨畫面共用的狀態。以 id 註冊後，任何地方呼叫 <code>$.store(\'id\')</code> 都拿到同一個實例；state 是 reactive 的，在 view 裡讀到的欄位或 getter 一變，所有用到它的畫面都會更新。修改邏輯集中寫在 actions，方便追蹤與測試。',
+        api: [
+          ["$.store('id', { state, getters, actions, persist })", '定義並註冊 store；同一個 id 再次定義會回傳已存在的實例。省略 id 則建立不註冊的 store'],
+          ["$.store('id')", '取得已註冊的 store，不存在時丟出錯誤。<code>$.store.has(id)</code> / <code>$.store.list()</code> 查詢'],
+          ['state', '回傳初始狀態的函式（建議），或物件（會保存一份深層複本供 <code>$reset</code> 使用）'],
+          ['getters', '<code>{ total: (state) => ... }</code>，具快取的衍生值，以 <code>store.total</code> 讀取（唯讀）；<code>this</code> 為 store，可讀其他 getter'],
+          ['actions', '方法，<code>this</code> 為 store；可以是 async。直接用 <code>this.x = ...</code> 修改狀態'],
+          ['store.x', '讀寫 state、讀 getter、呼叫 action'],
+          ['$patch(obj | fn)', '<code>$patch({ user: { name } })</code> 深層合併（陣列直接取代）；<code>$patch((state) => ...)</code> 一次修改多個欄位'],
+          ['$reset() / $state', '<code>$reset()</code> 回到初始狀態；<code>store.$state</code> 是原始的 reactive 物件，指定新物件可整個取代'],
+          ['$subscribe(cb, { immediate })', '狀態有任何（深層）變動時呼叫 <code>cb(state)</code>，同一個 tick 只通知一次；回傳取消函式'],
+          ['$onAction(listener)', '監聽 action 呼叫：<code>({ name, args, after(fn), onError(fn) })</code>，可用來記錄或除錯；回傳取消函式'],
+          ["$watch('path' | fn, cb, opts)", '監看 store 的某個欄位或 getter'],
+          ['persist', "<code>persist: \'key\'</code> 存到 localStorage；或 <code>{ key, storage, paths: [\'theme\', \'user.name\'] }</code> 只保存部分欄位"],
+          ['$dispose()', '停止所有訂閱並從全域移除'],
+        ],
+        demos: [
+          {
+            title: '購物車：多個元件共用同一個 store',
+            desc: '商品列表、徽章、購物車明細是三個互不相干的元件，都透過 <code>$.store(\'cart\')</code> 讀寫同一份資料；<code>$onAction</code> 把每次操作印在 console。',
+            code(el, log) {
+              const cart = $.store('cart', {
+                state: () => ({ items: [] }),
+                getters: {
+                  count: (state) => state.items.reduce((n, i) => n + i.qty, 0),
+                  total: (state) => state.items.reduce((n, i) => n + i.qty * i.price, 0),
+                },
+                actions: {
+                  add(product) {
+                    const hit = this.items.find((i) => i.id === product.id);
+                    if (hit) hit.qty++;
+                    else this.items.push({ ...product, qty: 1 });
+                  },
+                  remove(id) {
+                    this.items = this.items.filter((i) => i.id !== id);
+                  },
+                },
+              });
+              const off = cart.$onAction(({ name, args, after }) =>
+                after(() => log(`${name}(${args.map((a) => a.name || a).join()}) → 共 ${cart.count} 件`))
+              );
+
+              const products = [
+                { id: 1, name: '咖啡', price: 80 },
+                { id: 2, name: '紅茶', price: 50 },
+                { id: 3, name: '蛋糕', price: 120 },
+              ];
+
+              // 三個元件彼此不傳 props，各自從 store 取資料
+              const ProductList = $.component({
+                view: () => $('div.row').append(
+                  products.map((p) => $('button').text(`${p.name} $${p.price}`).on('click', () => $.store('cart').add(p)))
+                ),
+              });
+              const CartBadge = $.component({
+                view: () => $('span.tag').addClass({ active: $.store('cart').count > 0 }).text(`🛒 ${$.store('cart').count}`),
+              });
+              const CartDetail = $.component({
+                view: () => {
+                  const c = $.store('cart');
+                  return $('div').append(
+                    c.items.length ? $('ul').each(c.items, (i) => $('li').key(i.id).append(
+                      `${i.name} × ${i.qty} = $${i.qty * i.price}`,
+                      $('button').text('移除').on('click', () => c.remove(i.id))
+                    )) : $('p').css({ color: 'var(--muted)' }).text('購物車是空的'),
+                    $('div.row').append(
+                      $('b').text(`總計 $${c.total}`),
+                      $('button').text('清空').on('click', () => c.$reset())
+                    )
+                  );
+                },
+              });
+
+              const h = $.render(() => $('div').append($(CartBadge), $(ProductList), $(CartDetail)), el);
+              return { $unmount() { h.unmount(); off(); cart.$dispose(); } };
+            },
+          },
+          {
+            title: '持久化 persist ＋ $subscribe ＋ $patch',
+            desc: '修改設定後按「↻ 重新執行」（或重新整理頁面）：store 重建時會從 localStorage 讀回 <code>paths</code> 指定的欄位，<code>draft</code> 沒有保存所以會清空。',
+            code(el, log) {
+              const settings = $.store('settings', {
+                state: () => ({ name: '', fontSize: 16, dark: false, draft: '' }),
+                persist: { key: 'juicy-demo-settings', paths: ['name', 'fontSize', 'dark'] },
+              });
+              const stop = settings.$subscribe((state) => log('變動 →', JSON.stringify(state)));
+
+              const h = $.render(() =>
+                $('div').append(
+                  $('div.row').append($('span').text('名字'), $('input').model(settings, 'name')),
+                  $('div.row').append(
+                    $('span').text('字級'),
+                    $('input').attr({ type: 'range', min: 12, max: 24 }).model(settings, 'fontSize', { number: true })
+                  ),
+                  $('div.row').append(
+                    $('span').text('深色'),
+                    $('input').attr('type', 'checkbox').model(settings, 'dark')
+                  ),
+                  $('div.row').append($('span').text('草稿'), $('input').attr('placeholder', '不會被保存').model(settings, 'draft')),
+                  $('div.card').css({
+                    fontSize: settings.fontSize,
+                    background: settings.dark ? '#222' : '#fff',
+                    color: settings.dark ? '#eee' : '#222',
+                  }).text(`哈囉，${settings.name || '訪客'}！`),
+                  $('div.row').css({ marginTop: 8 }).append(
+                    $('button').text('$patch 一次改三項').on('click', () => settings.$patch({ name: 'Ada', fontSize: 20, dark: true })),
+                    $('button').text('$reset').on('click', () => settings.$reset())
+                  )
+                ), el);
+
+              return { $unmount() { h.unmount(); stop(); settings.$dispose(); } };
+            },
+          },
+        ],
+      },
+      {
+        id: 'resource',
+        group: '應用架構',
+        title: '非同步資料 $.resource',
+        intro: '把「抓資料」變成 reactive 的值：提供 <code>data</code> / <code>loading</code> / <code>error</code>，依賴變動時自動重新抓取；舊的請求會被中止，晚到的結果也會被忽略，不會發生畫面顯示舊資料的競態問題。',
+        api: [
+          ['$.resource(source, fetcher, opts)', '<code>source()</code> 的值變動時呼叫 <code>fetcher(value, { signal })</code>；值為 <code>null</code> / <code>undefined</code> / <code>false</code> 時不抓'],
+          ['$.resource(fetcher, opts)', '只給一個函式：fetcher 同步讀到的 reactive 資料就是依賴'],
+          ['res.data / loading / error / ready', '結果、是否載入中、錯誤、是否至少成功過一次（都是 reactive）'],
+          ['res.refetch() / mutate(v) / stop()', '重新抓取（回傳 Promise）、直接修改資料（例如樂觀更新）、停止'],
+          ['opts', '<code>{ initial, lazy, interval, onSuccess, onError }</code>：初始值、不自動抓取、輪詢間隔（毫秒）、成功 / 失敗時呼叫'],
+          ['自動停止', '在元件或 <code>$.app</code> 的 data / created 中建立時，卸載時會自動停止'],
+        ],
+        demos: [
+          {
+            title: '依 id 載入使用者：loading、錯誤、競態',
+            desc: '模擬 API 的延遲是隨機的；快速連按「下一位」時只會顯示最後一次請求的結果，舊請求會被中止。id 4 會回傳錯誤。',
+            code(el, log) {
+              const users = { 1: 'Ada Lovelace', 2: 'Alan Turing', 3: 'Grace Hopper', 5: 'Linus Torvalds' };
+              const fakeApi = (id, { signal }) => new Promise((resolve, reject) => {
+                const ms = 300 + Math.random() * 900;
+                const timer = setTimeout(() => {
+                  if (users[id]) resolve({ id, name: users[id], ms: Math.round(ms) });
+                  else reject(new Error(`找不到 id ${id}`));
+                }, ms);
+                signal.addEventListener('abort', () => {
+                  clearTimeout(timer);
+                  log(`中止 id ${id} 的請求`);
+                });
+              });
+
+              return $.app({
+                data: { id: 1, user: null },
+                created() {
+                  // 在 created 中建立：$.app 卸載時自動停止
+                  this.user = $.resource(() => this.id, fakeApi);
+                },
+                view: (vm) => $('div').append(
+                  $('div.row').append(
+                    $('button').text('上一位').attr('disabled', vm.id <= 1).on('click', () => vm.id--),
+                    $('b').text('id ' + vm.id),
+                    $('button').text('下一位').on('click', () => vm.id++),
+                    $('button').text('重新整理').on('click', () => vm.user.refetch())
+                  ),
+                  vm.user.loading && $('span.skeleton'),
+                  !vm.user.loading && vm.user.error && $('p').css({ color: 'crimson' }).text('❌ ' + vm.user.error.message),
+                  !vm.user.loading && !vm.user.error && vm.user.data && $('div.user-card').append(
+                    $('span.avatar').text(vm.user.data.name[0]),
+                    $('div').append($('b').text(vm.user.data.name), $('small').text(`#${vm.user.data.id}・${vm.user.data.ms} ms`))
+                  )
+                ),
+              }).mount(el);
+            },
+          },
+        ],
+      },
+      {
+        id: 'i18n',
+        group: '應用架構',
+        title: '多語系 $.i18n',
+        intro: '翻譯、複數與數字 / 日期格式。目前語言是 reactive 的：在 <code>$.render</code> / <code>$.app</code> / 元件的 view 裡呼叫 <code>t()</code>，切換語言時畫面會自動 patch。本文件的中英切換也是用它做的。',
+        api: [
+          ['$.i18n({ locale, fallback, messages, loaders, missing })', '建立翻譯器。<code>locale</code> 省略時依瀏覽器語言挑選；<code>fallback</code> 是找不到翻譯時的備用語言'],
+          ["i18n.t('key', params)", "巢狀 key 用 <code>.</code>：<code>t(\'nav.home\')</code>；<code>{name}</code> 插值：<code>t(\'hi\', { name })</code>。找不到時依序查 <code>zh-TW → zh → fallback</code>，再找不到就回傳 key 本身（因此也可以直接用原文當 key）"],
+          ['複數', "<code>t(\'apples\', 3)</code> 或 <code>{ n: 3 }</code>。訊息寫成 <code>\'one apple | {n} apples\'</code>（2 段：單數 | 複數；3 段：0 | 1 | 其他），或 <code>{ one, other, ... }</code>（依 <code>Intl.PluralRules</code>）"],
+          ['函式訊息', '<code>(params, i18n) => string</code>，可處理任意邏輯'],
+          ['i18n.locale', '讀取 / 設定目前語言（reactive）。<code>i18n.setLocale(l)</code> 回傳 Promise；若有 <code>loaders[l]</code> 會先非同步載入'],
+          ['i18n.add(locale, messages)', '加入或合併翻譯，畫面會跟著更新'],
+          ['i18n.n(number, opts) / i18n.d(date, opts)', '依目前語言格式化數字 / 日期（<code>Intl</code>）；<code>d()</code> 的 opts 可簡寫成 <code>\'short\'</code> / <code>\'long\'</code>'],
+          ["$('h1').t('key', params)", '鏈式寫法，等同 <code>.text(i18n.t(...))</code>，使用最後建立的 i18n（第三個參數可指定）'],
+          ['$.t(key, params)', '使用最後建立的 i18n 翻譯'],
+          ['i18n.has(key) / locales / loading / detect()', '工具：是否有翻譯、可用語言、載入中的語言、依瀏覽器語言挑選'],
+        ],
+        demos: [
+          {
+            title: '切換語言：插值、複數、數字 / 日期，以及非同步載入語系',
+            desc: '「日本語」的翻譯放在 <code>loaders</code>，第一次切換時才（模擬）載入。',
+            code(el, log) {
+              const i18n = $.i18n({
+                locale: 'zh-TW',
+                fallback: 'en',
+                messages: {
+                  'zh-TW': {
+                    hello: '你好，{name}！',
+                    cart: '購物車是空的 | 購物車有 1 件商品 | 購物車有 {n} 件商品',
+                    total: '總計',
+                  },
+                  en: {
+                    hello: 'Hello, {name}!',
+                    cart: 'Your cart is empty | 1 item in your cart | {n} items in your cart',
+                    total: 'Total',
+                  },
+                },
+                loaders: {
+                  ja: () => new Promise((resolve) => setTimeout(() => resolve({
+                    hello: 'こんにちは、{name}さん！',
+                    cart: 'カートは空です | カートに {n} 個の商品',
+                    total: '合計',
+                  }), 500)),
+                },
+              });
+
+              const s = $.reactive({ qty: 2 });
+              const langs = { 'zh-TW': '繁體中文', en: 'English', ja: '日本語' };
+
+              const h = $.render(() =>
+                $('div').append(
+                  $('nav.tabs').append(
+                    Object.keys(langs).map((l) =>
+                      $('a').attr('href', '#i18n').text(langs[l]).addClass({ active: i18n.locale === l })
+                        .on('click', (e) => {
+                          e.preventDefault();
+                          i18n.setLocale(l).then(() => log('locale →', l));
+                        })
+                    ),
+                    i18n.loading && $('span').text(' ⏳ ' + i18n.loading)
+                  ),
+                  $('h3').t('hello', { name: 'Ada' }, i18n),
+                  $('div.row').append(
+                    $('button').text('−').on('click', () => s.qty > 0 && s.qty--),
+                    $('span').css({ width: 'auto' }).text(i18n.t('cart', s.qty)),
+                    $('button').text('+').on('click', () => s.qty++)
+                  ),
+                  $('p').text(`${i18n.t('total')}：${i18n.n(s.qty * 1299.5, { style: 'currency', currency: 'TWD' })}`),
+                  $('p').text(i18n.d(new Date(2026, 10, 3), { dateStyle: 'full' }))
+                ), el);
+
+              return { $unmount: h.unmount };
+            },
+          },
+          {
+            title: '用原文當 key，並收集尚未翻譯的字串',
+            desc: '不必先替每句話取名字：中文原文本身就是 key，沒有英文翻譯時顯示原文，並透過 <code>missing</code> 回報。',
+            code(el, log) {
+              const todo = new Set();
+              const i18n = $.i18n({
+                locale: 'en',
+                messages: {
+                  en: {
+                    '儲存': 'Save',
+                    '取消': 'Cancel',
+                    '確定要刪除 {name} 嗎？': 'Delete {name}?',
+                  },
+                },
+                missing(key, locale) {
+                  if (locale !== 'zh' && !todo.has(key)) {
+                    todo.add(key);
+                    log('⚠️ 缺少翻譯：', key);
+                  }
+                },
+              });
+              const t = (k, p) => i18n.t(k, p);
+
+              const h = $.render(() =>
+                $('div').append(
+                  $('p').text(t('確定要刪除 {name} 嗎？', { name: 'report.pdf' })),
+                  $('div.row').append(
+                    $('button').text(t('儲存')),
+                    $('button').text(t('取消')),
+                    $('button').text(t('稍後提醒我'))
+                  ),
+                  $('button').text(i18n.locale === 'en' ? '切換成中文' : 'Switch to English')
+                    .on('click', () => (i18n.locale = i18n.locale === 'en' ? 'zh' : 'en'))
+                ), el);
+
+              return { $unmount: h.unmount };
+            },
+          },
+        ],
+      },
+      {
+        id: 'plugin',
+        group: '擴充與最佳化',
+        title: '外掛 $.fn',
+        intro: '<code>$.fn</code> 就是鏈式物件的 prototype，加上方法並 <code>return this</code> 即可延續鏈式。',
+        api: [['$.fn.name = function (...) { return this; }', '註冊外掛方法']],
+        demos: [
+          {
+            title: '自訂 badge()',
+            code(el) {
+              $.fn.badge = function (color) {
+                return this.css({ background: color, color: '#fff', padding: '2px 10px', borderRadius: 999 });
+              };
+              $('div').append(
+                $('span').text('外掛').badge('purple'),
+                ' ',
+                $('span').text('擴充').badge('teal')
+              ).mount(el);
+            },
+          },
+        ],
+      },
+      {
+        id: 'perf',
+        group: '擴充與最佳化',
+        title: '效能最佳化',
+        intro: '大多數情況不需要特別處理；資料量大或更新頻繁時可以用下面的工具。',
+        api: [
+          ['$.markRaw(obj)', '標記物件永遠不轉成 reactive（大型唯讀資料、第三方函式庫實例、DOM 元素）'],
+          ['$.shallowReactive(obj)', '只追蹤第一層屬性，巢狀物件原樣保留'],
+          ['.memo([deps])', 'deps 與上次相同時跳過整棵子樹的比對（子樹內的事件處理函式也沿用舊的）'],
+          ['keyed 列表', '以最長遞增子序列（LIS）找出不必移動的節點，重新排序時只搬移最少的 DOM 節點'],
+        ],
+        demos: [
+          {
+            title: '計算重新排序時的 DOM 搬移次數',
+            desc: '1000 個項目；「最後一項移到最前面」只需要搬移 1 個節點，其餘 999 個都不動。',
+            code(el, log) {
+              const s = $.reactive({ list: Array.from({ length: 1000 }, (_, i) => i) });
+              let moves = 0;
+              const spy = (ul) => {
+                if (!ul || ul.spied) return;
+                ul.spied = true;
+                const insertBefore = ul.insertBefore;
+                ul.insertBefore = function (...args) {
+                  moves++;
+                  return insertBefore.apply(this, args);
+                };
+              };
+              const run = (label, fn) => () => {
+                moves = 0;
+                fn();
+                $.nextTick().then(() => log(`${label}：搬移了 ${moves} 個節點`));
+              };
+              const h = $.render(() =>
+                $('div').append(
+                  $('div.row').append(
+                    $('button').text('最後一項移到最前面').on('click', run('移到最前面', () => s.list.unshift(s.list.pop()))),
+                    $('button').text('隨機交換兩項').on('click', run('交換兩項', () => {
+                      const i = Math.floor(Math.random() * 1000);
+                      const j = Math.floor(Math.random() * 1000);
+                      [s.list[i], s.list[j]] = [s.list[j], s.list[i]];
+                    })),
+                    $('button').text('反轉').on('click', run('反轉', () => s.list.reverse()))
+                  ),
+                  $('ul').css({ maxHeight: 120, overflow: 'auto' }).ref(spy)
+                    .each(s.list, (n) => $('li').key(n).memo([n]).text('#' + n))
+                ), el);
+              return { $unmount: h.unmount };
+            },
+          },
+        ],
+      },
+      {
+        id: 'misc',
+        group: '擴充與最佳化',
+        title: '其他',
+        api: [
+          ["$.text('str')", '建立文字虛擬節點'],
+          ['chain.vnode / chain.toVNode()', '取得虛擬節點物件'],
+          ['$.Chain', '鏈式物件的 class'],
+          ['$.version', '版本號'],
+        ],
+        demos: [
+          {
+            title: '雜項',
+            code(el, log) {
+              $('p').append('文字', $.text(' + $.text() 建立的文字節點')).mount(el);
+              log('$.version =', $.version);
+              log("$('a') instanceof $.Chain：", $('a') instanceof $.Chain);
+            },
+          },
+        ],
+      }
+    ];
+
+    /* ======================================================================
+     * 以下為文件頁本身，也是用 juicy.js 建出來的
+     * ====================================================================== */
+
+    // 取出函式本體並去除縮排，讓顯示的程式碼與實際執行的完全一致
+    function source(fn) {
+      const s = fn.toString();
+      const lines = s.slice(s.indexOf('{') + 1, s.lastIndexOf('}')).replace(/^\s*\n/, '').replace(/\s+$/, '').split('\n');
+      const indent = Math.min(...lines.filter((l) => l.trim()).map((l) => l.match(/^ */)[0].length));
+      return lines.map((l) => l.slice(indent)).join('\n');
+    }
+
+    function highlight(code) {
+      const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const re = /(\/\/[^\n]*)|(`(?:\\[\s\S]|[^`\\])*`|'(?:\\.|[^'\\\n])*'|"(?:\\.|[^"\\\n])*")|\b(const|let|var|function|return|if|else|new|true|false|null|undefined|this|await|async)\b|\b(\d+(?:\.\d+)?)\b|(\$)(?=[.(])|\.([A-Za-z_]\w*)(?=\()/g;
+      let out = '';
+      let last = 0;
+      let m;
+      while ((m = re.exec(code))) {
+        out += esc(code.slice(last, m.index));
+        if (m[1]) out += `<span class="tk-c">${esc(m[1])}</span>`;
+        else if (m[2]) out += `<span class="tk-s">${esc(m[2])}</span>`;
+        else if (m[3]) out += `<span class="tk-k">${m[3]}</span>`;
+        else if (m[4]) out += `<span class="tk-n">${m[4]}</span>`;
+        else if (m[5]) out += '<span class="tk-d">$</span>';
+        else out += `.<span class="tk-f">${m[6]}</span>`;
+        last = re.lastIndex;
+      }
+      return out + esc(code.slice(last));
+    }
+
+    /* ---------- 文件本身的多語系（用 $.i18n） ----------
+     * 介面文字用 key（ui.* / hero.*）；章節內容以「中文原文」當 key，英文翻譯在 docs/i18n-en.js。
+     * 範例程式碼只翻譯其中的字串與註解，翻譯後的程式碼就是實際執行的程式碼。
+     */
+    const LANGS = { zh: { label: '中文', html: 'zh-Hant' }, en: { label: 'English', html: 'en' } };
+    const LANG_KEY = 'juicy-doc-lang';
+    const pickLang = () => {
+      let l = null;
+      try { l = new URLSearchParams(location.search).get('lang'); } catch (e) { /* 無網址 */ }
+      if (!l) try { l = localStorage.getItem(LANG_KEY); } catch (e) { /* 無法讀取 */ }
+      if (LANGS[l]) return l;
+      return /^zh/i.test(navigator.language || '') ? 'zh' : 'en';
+    };
+    const DOC_EN = window.JUICY_DOC_EN || { ui: {}, content: {}, code: {} };
+    const doc = $.i18n({
+      locale: pickLang(),
+      fallback: 'zh',
+      messages: {
+        zh: {
+          ui: {
+            title: 'juicy.js API 文件',
+            apiDocs: 'API 文件',
+            start: '開始使用',
+            rerun: '↻ 重新執行',
+            reset: '重設',
+            resetTitle: '還原成原本的程式碼',
+          },
+          hero: {
+            lead: '本專案僅為示範用，請勿在正式專案使用。類 jQuery 的鏈式 API ＋ 虛擬 DOM ＋ MVVM，零相依、單一檔案。',
+            chain: { title: '鏈式建構', desc: "$('div').css().append() … 熟悉的 jQuery 寫法" },
+            vdom: { title: '虛擬 DOM', desc: '運算結束後才一次產生真實 DOM，更新時只 patch 差異' },
+            mvvm: { title: 'MVVM', desc: 'reactive 資料、computed、watch、雙向綁定 model()' },
+            component: { title: '元件', desc: '有自己狀態的可重用區塊，可從檔案 $.import()' },
+            router: { title: '路由', desc: '$.router() 依網址切換內容，不重新載入頁面' },
+            i18n: { title: '多語系', desc: '$.i18n() 翻譯、複數、數字與日期格式' },
+            store: { title: '全域狀態', desc: '$.store() 跨元件共用狀態，可訂閱、持久化' },
+          resource: { title: '非同步資料', desc: '$.resource() 依賴變動時自動抓取，處理 loading、錯誤與競態' },
+            intro: '以下每個範例的程式碼都是<strong>實際執行</strong>的原始碼，<code>el</code> 代表「結果」區塊、<code>log()</code> 會輸出到 console 區塊；可按「↻ 重新執行」重跑。<strong>程式碼可直接編輯</strong>，改完按 ⌘/Ctrl + Enter 或「↻ 重新執行」看結果，「重設」還原。',
+          },
+        },
+        en: { ...DOC_EN.ui, ...DOC_EN.content },
+      },
+    });
+    // 章節內容：中文原文當 key；中文模式找不到翻譯會直接回傳原文
+    const t = (zh) => (zh == null ? zh : doc.t(zh));
+
+    // 翻譯範例程式碼中的字串與註解（只換有中文的 token，程式結構不變）
+    const CJK = /[\u3000-\u9fff\uff00-\uffef]/;
+    function translateCode(code) {
+      if (doc.locale === 'zh') return code;
+      const dict = DOC_EN.code;
+      const re = /(\/\/[^\n]*)|(`(?:\\[\s\S]|[^`\\])*`|'(?:\\.|[^'\\\n])*'|"(?:\\.|[^"\\\n])*")/g;
+      return code.replace(re, (m, comment, str) => {
+        if (!CJK.test(m)) return m;
+        if (comment) {
+          const body = comment.replace(/^\/\/\s?/, '');
+          return hasOwn(dict, body) ? '// ' + dict[body] : m;
+        }
+        const q = str[0];
+        const inner = str.slice(1, -1);
+        if (!hasOwn(dict, inner)) return m;
+        // 翻譯內容若含同一種引號，自動跳脫
+        return q + dict[inner].replace(new RegExp('(^|[^\\\\])' + q, 'g'), '$1\\' + q) + q;
+      });
+    }
+    const hasOwn = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+
+    const fmt = (v) =>
+      typeof v === 'string' ? v : v === undefined ? 'undefined' : JSON.stringify(v);
+
+    const demos = {};
+    const cleanups = {};
+    const editors = {};
+
+    /* ---------- 可編輯的程式碼區塊：即時上色、Tab 縮排、Enter 自動縮排、⌘/Ctrl+Z 復原 ---------- */
+    function selOffsets(root) {
+      const sel = getSelection();
+      if (!sel.rangeCount || !root.contains(sel.anchorNode)) return [0, 0];
+      const at = (node, off) => {
+        const r = document.createRange();
+        r.selectNodeContents(root);
+        r.setEnd(node, off);
+        return r.toString().length;
+      };
+      const a = at(sel.anchorNode, sel.anchorOffset);
+      const b = at(sel.focusNode, sel.focusOffset);
+      return [Math.min(a, b), Math.max(a, b)];
+    }
+    function setCaret(root, offset) {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let n;
+      while ((n = walker.nextNode())) {
+        if (offset <= n.length) return getSelection().collapse(n, offset);
+        offset -= n.length;
+      }
+      getSelection().collapse(root, root.childNodes.length);
+    }
+
+    function makeEditor(codeEl, { onRun, onChange } = {}) {
+      const original = codeEl.textContent;
+      let text = original;
+      const undo = [];
+      let redo = [];
+      let lastSnap = 0;
+      try { codeEl.contentEditable = 'plaintext-only'; } catch (e) { /* 舊瀏覽器不支援 */ }
+      if (codeEl.contentEditable !== 'plaintext-only') codeEl.contentEditable = 'true';
+      codeEl.spellcheck = false;
+      codeEl.setAttribute('autocorrect', 'off');
+      codeEl.setAttribute('autocapitalize', 'off');
+
+      // 結尾多放一個換行，讓最後一行是空行時游標仍看得到
+      const read = () => { const t = codeEl.textContent; return t.endsWith('\n') ? t.slice(0, -1) : t; };
+      const paint = (caret) => {
+        codeEl.innerHTML = highlight(text) + '\n';
+        if (caret != null) setCaret(codeEl, caret);
+        if (onChange) onChange(text !== original);
+      };
+      const snapshot = (force) => {
+        const now = Date.now();
+        if (force || now - lastSnap > 600) undo.push({ text, caret: selOffsets(codeEl)[0] });
+        if (undo.length > 300) undo.shift();
+        lastSnap = now;
+        redo = [];
+      };
+      const splice = (start, end, ins, caret) => {
+        snapshot(true);
+        text = text.slice(0, start) + ins + text.slice(end);
+        paint(caret != null ? caret : start + ins.length);
+      };
+      const history = (from, to) => {
+        if (!from.length) return;
+        to.push({ text, caret: selOffsets(codeEl)[0] });
+        const st = from.pop();
+        text = st.text;
+        paint(st.caret);
+      };
+      const lineStart = (i) => text.lastIndexOf('\n', i - 1) + 1;
+
+      codeEl.addEventListener('keydown', (e) => {
+        if (e.isComposing || e.keyCode === 229) return;
+        const mod = e.metaKey || e.ctrlKey;
+        const [s, t] = selOffsets(codeEl);
+        if (mod && e.key === 'Enter') {
+          e.preventDefault();
+          if (onRun) onRun();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          const indent = text.slice(lineStart(s), s).match(/^ */)[0];
+          splice(s, t, '\n' + indent);
+        } else if (e.key === 'Tab' && !mod) {
+          e.preventDefault();
+          if (e.shiftKey) {
+            const ls = lineStart(s);
+            const n = text.slice(ls, ls + 2).match(/^ */)[0].length;
+            if (n) splice(ls, ls + n, '', Math.max(ls, s - n));
+          } else {
+            splice(s, t, '  ');
+          }
+        } else if (mod && e.key.toLowerCase() === 'z') {
+          e.preventDefault();
+          e.shiftKey ? history(redo, undo) : history(undo, redo);
+        } else if (mod && e.key.toLowerCase() === 'y') {
+          e.preventDefault();
+          history(redo, undo);
+        } else if (e.key === 'Escape') {
+          codeEl.blur();
+        }
+      });
+      codeEl.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const [s, t] = selOffsets(codeEl);
+        splice(s, t, (e.clipboardData.getData('text/plain') || '').replace(/\r\n?/g, '\n'));
+      });
+      codeEl.addEventListener('beforeinput', (e) => {
+        if (e.inputType === 'historyUndo' || e.inputType === 'historyRedo') {
+          e.preventDefault();
+          e.inputType === 'historyUndo' ? history(undo, redo) : history(redo, undo);
+        } else if (!e.isComposing) {
+          snapshot(false);
+        }
+      });
+      const sync = () => {
+        const caret = selOffsets(codeEl)[0];
+        text = read();
+        paint(caret);
+      };
+      codeEl.addEventListener('input', (e) => { if (!e.isComposing) sync(); }); // 中文輸入法組字中不重繪
+      codeEl.addEventListener('compositionend', sync);
+
+      return {
+        original,
+        get: () => text,
+        reset() {
+          snapshot(true);
+          text = original;
+          paint();
+        },
+      };
+    }
+
+    function runDemo(key) {
+      if (cleanups[key]) {
+        try { cleanups[key].$unmount(); } catch (e) { /* 已卸載 */ }
+        cleanups[key] = null;
+      }
+      const el = document.getElementById('r-' + key);
+      const logEl = document.getElementById('l-' + key);
+      el.innerHTML = '';
+      logEl.innerHTML = '';
+      const log = (...args) => {
+        const line = document.createElement('div');
+        line.textContent = args.map(fmt).join(' ');
+        logEl.appendChild(line);
+      };
+      try {
+        // 顯示的程式碼和原始函式相同時直接執行原函式；否則（已編輯、或翻譯成英文）執行畫面上的程式碼
+        const ed = editors[key];
+        const run = !ed || ed.get() === source(demos[key].code) ? demos[key].code : new Function('el', 'log', ed.get());
+        const r = run(el, log);
+        if (r && typeof r.$unmount === 'function') cleanups[key] = r;
+      } catch (e) {
+        log('❌ ' + e.message);
+      }
+    }
+
+    function demoCard(sec, d, i) {
+      const key = `${sec.id}-${i}`;
+      demos[key] = d;
+      return $('div.demo').append(
+        $('div.demo-head').append(
+          $('h3').text(t(d.title)),
+          $('div.actions').append(
+            $('button.rerun.reset').t('ui.reset', null, doc).attr('title', doc.t('ui.resetTitle')).on('click', () => {
+              editors[key].reset();
+              runDemo(key);
+            }),
+            $('button.rerun').t('ui.rerun', null, doc).on('click', () => runDemo(key))
+          )
+        ),
+        d.desc && $('p.desc').html(t(d.desc)),
+        $('pre.code').attr('data-demo', key).append($('code').html(highlight(translateCode(source(d.code))))),
+        $('div.result').id('r-' + key),
+        $('div.log').id('l-' + key)
+      );
+    }
+
+    const quickStart = `<script src="juicy.js"><\/script>
+<div id="app"></div>
+<script>
+  $('div')
+    .css({ color: '#FFCC00' })
+    .append(
+      $('a').text('123'),
+      $('a').text('456'),
+    )
+    .mount('#app');
+<\/script>`;
+
+    const buildHero = () => $('section#start').append(
+      $('h1').append('juicy', $('span').text('.js'), $('span').css({ paddingLeft: '20px', color: '#AAA', fontSize: '12px' }).text('claude x William77')),
+      $('p.lead').t('hero.lead', null, doc),
+      $('ul.features').append(
+        ['chain', 'vdom', 'mvvm', 'component', 'router', 'store', 'resource', 'i18n'].map((k) =>
+          $('li').append($('b').t(`hero.${k}.title`, null, doc), doc.t(`hero.${k}.desc`))
+        )
+      ),
+      $('p.intro').html(doc.t('hero.intro')),
+      $('pre.code.no-run').css({ margin: '12px 0' }).append($('code').html(highlight(quickStart)))
+    );
+
+    // 主內容：依目前語言建立；切換語言時整個重建並重新執行所有範例
+    let io = null;
+    function renderMain() {
+      Object.keys(cleanups).forEach((key) => {
+        try { cleanups[key] && cleanups[key].$unmount(); } catch (e) { /* 已卸載 */ }
+        cleanups[key] = null;
+      });
+      Object.keys(editors).forEach((k) => delete editors[k]);
+
+      $('div').append(
+        buildHero(),
+        sections.map((sec, i) =>
+          $('section').id(sec.id).append(
+            i > 0 && sec.group !== sections[i - 1].group && $('div.part').text(t(sec.group)), // 第一組接在首頁介紹後面，不另加標題
+            $('h2').text(t(sec.title)),
+            sec.intro && $('p.intro').html(t(sec.intro)),
+            sec.api && $('table.api').append(
+              $('tbody').each(sec.api, ([sig, desc]) =>
+                $('tr').append($('td').append($('code').text(t(sig))), $('td').html(t(desc)))
+              )
+            ),
+            sec.demos.map((d, i) => demoCard(sec, d, i))
+          )
+        )
+      ).mount('#main');
+
+      // 讓所有 pre.code 都可編輯；範例區塊的程式碼會在重新執行時使用
+      document.querySelectorAll('pre.code > code').forEach((codeEl) => {
+        const key = codeEl.parentNode.dataset.demo;
+        const ed = makeEditor(codeEl, key && {
+          onRun: () => runDemo(key),
+          onChange: (edited) => codeEl.closest('.demo').classList.toggle('edited', edited),
+        });
+        if (key) editors[key] = ed;
+      });
+      // 點 pre 的留白處也能進入編輯
+      document.querySelectorAll('pre.code').forEach((pre) =>
+        pre.addEventListener('mousedown', (e) => {
+          if (e.target === pre) {
+            e.preventDefault();
+            pre.firstChild.focus();
+            setCaret(pre.firstChild, Infinity);
+          }
+        })
+      );
+
+      Object.keys(demos).forEach(runDemo);
+
+      if (io) io.disconnect();
+      if (typeof IntersectionObserver !== 'undefined') {
+        io = new IntersectionObserver(
+          (entries) => entries.forEach((e) => e.isIntersecting && (navState.active = e.target.id)),
+          { rootMargin: '-10% 0px -80% 0px' }
+        );
+        document.querySelectorAll('#main section').forEach((s) => io.observe(s));
+      }
+    }
+
+    // 側欄：響應式渲染（讀 doc.t()，切換語言時自動更新），捲動時自動標示目前章節
+    const navState = $.reactive({ active: 'start' });
+    $.render(() =>
+      $('nav.toc').append(
+        $('div.brand').append('juicy', $('span').text('.js')),
+        $('div.ver').text(`v${$.version} ${doc.t('ui.apiDocs')}`),
+        $('div.lang').append(
+          Object.keys(LANGS).map((l) =>
+            $('button').text(LANGS[l].label).addClass({ on: doc.locale === l }).attr('lang', LANGS[l].html)
+              .on('click', () => setLang(l))
+          )
+        ),
+        [{ id: 'start', title: 'ui.start', group: sections[0].group }, ...sections].map((s, i, list) => [
+          // 每組的第一個章節前面加上分組標題
+          s.group && s.group !== (list[i - 1] && list[i - 1].group) && $('div.toc-group').text(t(s.group)),
+          $('a').attr('href', '#' + s.id).text(s.id === 'start' ? doc.t(s.title) : t(s.title))
+            .addClass({ active: navState.active === s.id }),
+        ])
+      ), '#nav');
+
+    function applyLang() {
+      document.documentElement.lang = LANGS[doc.locale].html;
+      document.title = doc.t('ui.title');
+    }
+
+    function setLang(l) {
+      if (l === doc.locale) return;
+      // 記住目前看到的章節，重建後捲回同一處
+      const anchor = document.getElementById(navState.active);
+      const offset = anchor ? anchor.getBoundingClientRect().top : 0;
+      doc.locale = l;
+      try { localStorage.setItem(LANG_KEY, l); } catch (e) { /* 無法儲存 */ }
+      try {
+        const url = new URL(location.href);
+        url.searchParams.set('lang', l);
+        history.replaceState(null, '', url);
+      } catch (e) { /* file:// 等環境 */ }
+      applyLang();
+      renderMain();
+      const again = document.getElementById(navState.active);
+      if (again) window.scrollBy(0, again.getBoundingClientRect().top - offset);
+    }
+
+    applyLang();
+    renderMain();
+  </script>
+</body>
+
+</html>
